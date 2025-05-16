@@ -5,7 +5,7 @@ import { useForm, type Sugar } from '@sugarform/core';
 type FormType = {
   person_a: Person;
   person_b: Person;
-}
+};
 
 function App() {
   const sugar = useForm<FormType>({
@@ -18,11 +18,10 @@ function App() {
         firstName: '',
         lastName: '',
       },
-    }
+    },
   });
 
   const { fields } = sugar.useObject();
-
 
   return (
     <>
@@ -31,11 +30,15 @@ function App() {
       <PersonInput sugar={fields.person_a} />
       <h2>Person B</h2>
       <PersonInput sugar={fields.person_b} />
-      <button type="button" onClick={async () => {
-        const result = await sugar.get();
-        console.log(result);
-      }}
-      >get</button>
+      <button
+        type="button"
+        onClick={async () => {
+          const result = await sugar.get();
+          console.log(result);
+        }}
+      >
+        get
+      </button>
     </>
   );
 }
@@ -59,11 +62,10 @@ function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
         <TextInput sugar={fields.lastName} />
       </label>
     </div>
-  )
+  );
 }
 
 function TextInput({ sugar }: { sugar: Sugar<string> }) {
-
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -71,27 +73,27 @@ function TextInput({ sugar }: { sugar: Sugar<string> }) {
       sugar.ready(
         () => {
           if (!ref.current) {
-            return Promise.resolve({ result: 'unavailable' })
+            return Promise.resolve({ result: 'unavailable' });
           }
-          return Promise.resolve({ result: 'success', value: ref.current.value })
+          return Promise.resolve({
+            result: 'success',
+            value: ref.current.value,
+          });
         },
         (value) => {
           if (!ref.current) {
-            return Promise.resolve({ result: 'unavailable' })
+            return Promise.resolve({ result: 'unavailable' });
           }
           ref.current.value = value;
-          return Promise.resolve({ result: 'success' })
-        },
+          return Promise.resolve({ result: 'success' });
+        }
       );
     }
   }, [sugar]);
 
   return (
     <div>
-      <input
-        type="text"
-        ref={ref}
-      />
+      <input type="text" ref={ref} />
     </div>
   );
 }

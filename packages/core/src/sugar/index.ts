@@ -1,45 +1,56 @@
-import { Sugar, SugarGetResult, SugarGetter, SugarSetResult, SugarSetter, SugarUseObject, SugarValue, SugarValueObject } from './types';
+import {
+  Sugar,
+  SugarGetResult,
+  SugarGetter,
+  SugarSetResult,
+  SugarSetter,
+  SugarUseObject,
+  SugarValue,
+  SugarValueObject,
+} from './types';
 import { useObject } from './useObject';
 
 export class SugarInner<T extends SugarValue> {
-
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
   // そのあいだに、get/setが呼びだされた場合、状態がReadyになるまで待機して実行します。
-  private status: {
-    status: 'unready',
+  private status:
+    | {
+        status: 'unready';
 
-    // unreadyな状態でgetが呼びだされた場合に返却されるPromise。
-    getPromise: ReturnType<SugarGetter<T>>,
+        // unreadyな状態でgetが呼びだされた場合に返却されるPromise。
+        getPromise: ReturnType<SugarGetter<T>>;
 
-    // `getPromise`を解決する関数。readyすると直ちに呼び出される。
-    resolveGetPromise: (value: SugarGetResult<T>) => void,
+        // `getPromise`を解決する関数。readyすると直ちに呼び出される。
+        resolveGetPromise: (value: SugarGetResult<T>) => void;
 
-    // unreadyな状態でsetが呼びだされた場合に返却されるPromise。
-    setPromise: ReturnType<SugarSetter<T>>,
+        // unreadyな状態でsetが呼びだされた場合に返却されるPromise。
+        setPromise: ReturnType<SugarSetter<T>>;
 
-    // `setPromise`を解決する関数。readyすると直ちに呼び出される。
-    resolveSetPromise: (value: SugarSetResult<T>) => void,
+        // `setPromise`を解決する関数。readyすると直ちに呼び出される。
+        resolveSetPromise: (value: SugarSetResult<T>) => void;
 
-    // unreadyな状態で呼び出された最新のsetの値。
-    recentValue: T | null,
+        // unreadyな状態で呼び出された最新のsetの値。
+        recentValue: T | null;
 
-    // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
-    lock: boolean,
-
-  } | {
-    status: 'ready',
-    getter: SugarGetter<T>,
-    setter: SugarSetter<T>,
-  } | {
-    status: 'unavailable',
-  };
-
+        // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
+        lock: boolean;
+      }
+    | {
+        status: 'ready';
+        getter: SugarGetter<T>;
+        setter: SugarSetter<T>;
+      }
+    | {
+        status: 'unavailable';
+      };
 
   template: T;
 
   constructor(template: T) {
-    const { promise: getPromise, resolve: resolveGetPromise } = Promise.withResolvers<SugarGetResult<T>>();
-    const { promise: setPromise, resolve: resolveSetPromise } = Promise.withResolvers<SugarSetResult<T>>();
+    const { promise: getPromise, resolve: resolveGetPromise } =
+      Promise.withResolvers<SugarGetResult<T>>();
+    const { promise: setPromise, resolve: resolveSetPromise } =
+      Promise.withResolvers<SugarSetResult<T>>();
 
     this.status = {
       status: 'unready',
@@ -57,9 +68,9 @@ export class SugarInner<T extends SugarValue> {
   get(): Promise<SugarGetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
-        return Promise.resolve( {
+        return Promise.resolve({
           result: 'unavailable',
-        } );
+        });
       case 'unready':
         return this.status.getPromise;
       case 'ready':
@@ -70,9 +81,9 @@ export class SugarInner<T extends SugarValue> {
   set(value: T): Promise<SugarSetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
-        return Promise.resolve( {
+        return Promise.resolve({
           result: 'unavailable',
-        } );
+        });
       case 'unready':
         this.status.recentValue = value;
         return this.status.setPromise;
@@ -90,7 +101,9 @@ export class SugarInner<T extends SugarValue> {
       this.status.lock = true;
 
       this.status.resolveGetPromise(await getter());
-      this.status.resolveSetPromise(await setter(this.status.recentValue ?? this.template));
+      this.status.resolveSetPromise(
+        await setter(this.status.recentValue ?? this.template)
+      );
     }
 
     this.status = {
@@ -108,6 +121,6 @@ export class SugarInner<T extends SugarValue> {
     }
   }
 
-  useObject: SugarUseObject<T> = (() => useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
+  useObject: SugarUseObject<T> = (() =>
+    useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
 }
-
