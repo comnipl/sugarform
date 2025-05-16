@@ -1,6 +1,6 @@
 {
   "name": "@sugarform/core",
-  "version": "0.1.0",
+  "version": "1.0.0-beta.20",
   "description": "Sugarform is Uncontrolled, Growth-ready, And Reusable form framework of react.",
   "type": "module",
   "repository": {
