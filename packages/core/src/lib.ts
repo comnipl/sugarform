@@ -1,5 +1,2 @@
-export { bare } from './util';
-
-export function hello(a: string): string {
-  return 'Hello, world!' + a;
-}
+export { useForm } from './form';
+export type { Sugar } from './sugar/types';
