@@ -27,7 +27,7 @@ export function useObject<T extends SugarValueObject>(
       async () => {
         if (!matchSugars(sugar, sugars.current)) {
           console.error(
-            'sugarのtemplateとmapのkeyが一致しません。恐らくSugarForm側の問題ですので、報告してください。'
+            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
           );
           sugar.destroy();
           return { result: 'unavailable' };
@@ -75,7 +75,7 @@ export function useObject<T extends SugarValueObject>(
       async (value) => {
         if (!matchSugars(sugar, sugars.current)) {
           console.error(
-            'sugarのtemplateとmapのkeyが一致しません。恐らくSugarForm側の問題ですので、報告してください。'
+            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
           );
           sugar.destroy();
           return { result: 'unavailable' };
