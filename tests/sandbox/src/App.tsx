@@ -2,28 +2,64 @@ import { useEffect, useRef } from 'react';
 import './App.css';
 import { useForm, type Sugar } from '@sugarform/core';
 
+type FormType = {
+  person_a: Person;
+  person_b: Person;
+}
+
 function App() {
-  const sugar = useForm<string>({
-    template: 'Hello, Sugarform!',
+  const sugar = useForm<FormType>({
+    template: {
+      person_a: {
+        firstName: '',
+        lastName: '',
+      },
+      person_b: {
+        firstName: '',
+        lastName: '',
+      },
+    }
   });
 
-  useEffect(() => {
-    setTimeout(() => {
-      sugar.set('Hello, Sugarform!');
-    }, 5000);
-  }, [sugar]);
+  const { fields } = sugar.useObject();
+
 
   return (
     <>
       <h1>Hello, Sugarform!</h1>
-      <TextInput sugar={sugar} />
+      <h2>Person A</h2>
+      <PersonInput sugar={fields.person_a} />
+      <h2>Person B</h2>
+      <PersonInput sugar={fields.person_b} />
       <button type="button" onClick={async () => {
         const result = await sugar.get();
-        alert(JSON.stringify( result ));
+        console.log(result);
       }}
       >get</button>
     </>
   );
+}
+
+type Person = {
+  firstName: string;
+  lastName: string;
+};
+
+function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
+  const { fields } = sugar.useObject();
+
+  return (
+    <div>
+      <label>
+        First Name:
+        <TextInput sugar={fields.firstName} />
+      </label>
+      <label>
+        Last Name:
+        <TextInput sugar={fields.lastName} />
+      </label>
+    </div>
+  )
 }
 
 function TextInput({ sugar }: { sugar: Sugar<string> }) {
@@ -48,7 +84,7 @@ function TextInput({ sugar }: { sugar: Sugar<string> }) {
         },
       );
     }
-  }, []);
+  }, [sugar]);
 
   return (
     <div>

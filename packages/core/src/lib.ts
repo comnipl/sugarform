@@ -1,2 +1,2 @@
 export { useForm } from './form';
-export { Sugar } from './sugar';
+export type { Sugar } from './sugar/types';

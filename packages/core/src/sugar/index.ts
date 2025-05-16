@@ -1,6 +1,7 @@
-import { SugarGetResult, SugarGetter, SugarSetResult, SugarSetter, SugarValue } from './types';
+import { Sugar, SugarGetResult, SugarGetter, SugarSetResult, SugarSetter, SugarUseObject, SugarValue, SugarValueObject } from './types';
+import { useObject } from './useObject';
 
-export class Sugar<T extends SugarValue> {
+export class SugarInner<T extends SugarValue> {
 
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
   // そのあいだに、get/setが呼びだされた場合、状態がReadyになるまで待機して実行します。
@@ -89,10 +90,7 @@ export class Sugar<T extends SugarValue> {
       this.status.lock = true;
 
       this.status.resolveGetPromise(await getter());
-      if (this.status.recentValue !== null) {
-        console.log('setter', this.status.recentValue);
-        this.status.resolveSetPromise(await setter(this.status.recentValue));
-      }
+      this.status.resolveSetPromise(await setter(this.status.recentValue ?? this.template));
     }
 
     this.status = {
@@ -101,4 +99,15 @@ export class Sugar<T extends SugarValue> {
       setter,
     };
   }
+
+  destroy() {
+    if (this.status.status === 'ready') {
+      this.status = {
+        status: 'unavailable',
+      };
+    }
+  }
+
+  useObject: SugarUseObject<T> = (() => useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
 }
+
