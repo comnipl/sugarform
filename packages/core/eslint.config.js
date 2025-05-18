@@ -1,14 +1,13 @@
 import libraryConfig from '@repo/eslint-config/library.js';
 
-
 export default [
   ...libraryConfig,
   {
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
-      }
-    }
+      },
+    },
   },
   {
     files: ['**/*.ts?(x)'],
@@ -22,6 +21,6 @@ export default [
           destructuredArrayIgnorePattern: '^_',
         },
       ],
-    }
-  }
-]
+    },
+  },
+];
