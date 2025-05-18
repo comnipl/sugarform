@@ -19,7 +19,10 @@
       ]
     },
     "lint": {
-      "cache": false
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/configs/eslint-config/**/*"
+      ]
     },
     "typecheck": {
       "dependsOn": [
