@@ -9,15 +9,27 @@ import eslintConfigPrettier from 'eslint-config-prettier';
 import turboConfig from 'eslint-config-turbo/flat';
 import importPlugin from 'eslint-plugin-import';
 
+import reactHooks from 'eslint-plugin-react-hooks';
+import reactRefresh from 'eslint-plugin-react-refresh';
+
 export default defineConfig([
   globalIgnores(['node_modules/', 'dist/']),
   {
     files: ['**/*.ts?(x)'],
     plugins: {
       import: importPlugin,
+      'react-hooks': reactHooks,
+      'react-refresh': reactRefresh,
       '@typescript-eslint': ts.plugin,
     },
     extends: [js.configs.recommended, ts.configs.recommended],
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      'react-refresh/only-export-components': [
+        'warn',
+        { allowConstantExport: true },
+      ],
+    },
     settings: {
       'import/resolver': {
         typescript: {
