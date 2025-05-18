@@ -32,6 +32,9 @@
     "typecheck": "tsc --noEmit --composite false",
     "lint": "eslint ."
   },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*"
+  },
   "peerDependencies": {
     "@types/react": "^18.0.0",
     "react": "^18.0.0"
