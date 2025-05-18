@@ -112,7 +112,7 @@ export function useObject<T extends SugarValueObject>(
     return () => {
       sugar.destroy();
     };
-  }, []);
+  }, [sugar]);
 
   return {
     fields: Object.fromEntries(
