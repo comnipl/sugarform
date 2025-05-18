@@ -1,7 +1,7 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": ["**/.env.*local"],
-  "pipeline": {
+  "tasks": {
     "topo": {
       "dependsOn": ["^topo"]
     },
@@ -10,7 +10,7 @@
       "outputs": ["dist/**"]
     },
     "lint": {
-      "cache": false
+      "inputs": ["$TURBO_DEFAULT$", "$TURBO_ROOT$/configs/eslint-config/**/*"]
     },
     "typecheck": {
       "dependsOn": ["^topo", "^build"],

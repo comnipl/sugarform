@@ -47,8 +47,9 @@ async function bundle() {
       }),
     ],
   });
-  const sourcemap = outputFiles.find((v) => v.path.endsWith('index.ts.map'))
-    ?.text;
+  const sourcemap = outputFiles.find((v) =>
+    v.path.endsWith('index.ts.map')
+  )?.text;
   const source = outputFiles.find((v) => v.path.endsWith('index.ts'))?.text;
 
   if (sourcemap === undefined) {
