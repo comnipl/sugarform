@@ -1,4 +1,4 @@
-name: build
+name: test
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 permissions: read-all
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - if: ${{ github.event_name != 'pull_request_target' }}
