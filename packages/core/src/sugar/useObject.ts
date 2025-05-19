@@ -11,7 +11,7 @@ import { SugarInner } from '.';
 export function useObject<T extends SugarValueObject>(
   sugar: Sugar<T>
 ): SugarUseObjectResult<T> {
-  const sugars = useRef<Map<string, Sugar<unknown>>>();
+  const sugars = useRef<Map<string, Sugar<unknown>>>(undefined);
 
   // sugars内の値を初期化する。 (空のsugarで埋める)
   if (!sugars.current) {
