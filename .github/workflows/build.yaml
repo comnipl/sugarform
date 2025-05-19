@@ -1,4 +1,4 @@
-name: build-and-test
+name: build
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 permissions: read-all
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - if: ${{ github.event_name != 'pull_request_target' }}
@@ -20,7 +20,7 @@ jobs:
       - name: Setup turbo
         uses: ./.github/actions/setup-turbo
         with:
-          turbo-cache-key: build-and-test
+          turbo-cache-key: build
       - name: Run Build
         run: pnpm build
 
