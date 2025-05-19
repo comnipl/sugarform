@@ -1,0 +1,19 @@
+{
+  "name": "core-unittest",
+  "type": "module",
+  "packageManager": "pnpm@10.11.0",
+  "scripts": {
+    "lint": "eslint .",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@sugarform/core": "workspace:*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^19.1.2",
+    "jsdom": "^26.1.0"
+  }
+}

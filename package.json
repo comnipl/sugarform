@@ -6,6 +6,7 @@
     "build": "turbo build",
     "lint": "turbo lint -- --max-warnings=0",
     "typecheck": "turbo typecheck",
+    "test": "vitest --ui --coverage",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,md,json}\"",
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,md,json}\""
   },
@@ -16,6 +17,8 @@
     "@swc/core": "^1.3.100",
     "@types/multi-stage-sourcemap": "^0.3.4",
     "@types/node": "^22.10.4",
+    "@vitest/coverage-istanbul": "3.1.3",
+    "@vitest/ui": "3.1.3",
     "consola": "^3.2.3",
     "esbuild": "^0.19.9",
     "esbuild-node-externals": "^1.11.0",
@@ -26,11 +29,17 @@
     "source-map": "^0.7.4",
     "tsx": "^4.6.2",
     "turbo": "^2.5.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
   },
   "packageManager": "pnpm@10.11.0",
+  "pnpm": {
+    "executionEnv": {
+      "nodeVersion": "22.14.0"
+    }
+  },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "manypkg": {
     "ignoredRules": [

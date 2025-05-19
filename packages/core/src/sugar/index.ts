@@ -100,10 +100,10 @@ export class SugarInner<T extends SugarValue> {
       }
       this.status.lock = true;
 
-      this.status.resolveGetPromise(await getter());
       this.status.resolveSetPromise(
         await setter(this.status.recentValue ?? this.template)
       );
+      this.status.resolveGetPromise(await getter());
     }
 
     this.status = {
