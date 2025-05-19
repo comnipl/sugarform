@@ -1,6 +1,6 @@
 import { useForm } from '@sugarform/core';
 import { renderHook, render } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { TextInput } from './textInput';
 
 async function checkPending<T>(
@@ -22,7 +22,7 @@ async function checkPending<T>(
 }
 
 describe('Sugar#ready', () => {
-  it('Sugar#get works', async () => {
+  test('getPromise is Pending until Ready', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
     const get = result.current.get();
@@ -36,6 +36,47 @@ describe('Sugar#ready', () => {
       value: {
         result: 'success',
         value: '',
+      },
+    });
+  });
+
+  test('setPromise is Pending until Ready', async () => {
+    const { result } = renderHook(() => useForm<string>({ template: '' }));
+
+    const set = result.current.set('test');
+
+    expect(await checkPending(set)).toStrictEqual({ resolved: false });
+
+    render(<TextInput sugar={result.current} />);
+
+    expect(await checkPending(set)).toStrictEqual({
+      resolved: true,
+      value: {
+        result: 'success',
+      },
+    });
+  });
+
+
+  test('getPromise returns value given by setter', async () => {
+    const { result } = renderHook(() => useForm<string>({ template: '' }));
+    const get = result.current.get();
+    const set = result.current.set('test');
+    expect(await checkPending(get)).toStrictEqual({ resolved: false });
+    expect(await checkPending(set)).toStrictEqual({ resolved: false });
+
+    render(<TextInput sugar={result.current} />);
+    expect(await checkPending(get)).toStrictEqual({
+      resolved: true,
+      value: {
+        result: 'success',
+        value: 'test',
+      },
+    });
+    expect(await checkPending(set)).toStrictEqual({
+      resolved: true,
+      value: {
+        result: 'success',
       },
     });
   });
