@@ -1,5 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import { fileURLToPath, URL } from 'url'
+import { fileURLToPath, URL } from 'url';
 
 export default defineConfig({
   workspace: ['packages/*', 'tests/*'],
@@ -7,9 +7,11 @@ export default defineConfig({
     alias: [
       {
         find: '@sugarform/core',
-        replacement: fileURLToPath(new URL('./packages/core/src/lib.ts', import.meta.url))
-      }
-    ]
+        replacement: fileURLToPath(
+          new URL('./packages/core/src/lib.ts', import.meta.url)
+        ),
+      },
+    ],
   },
   test: {
     globals: true,

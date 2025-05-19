@@ -57,7 +57,6 @@ describe('Sugar#ready', () => {
     });
   });
 
-
   test('getPromise returns value given by setter', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
     const get = result.current.get();
