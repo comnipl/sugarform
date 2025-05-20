@@ -29,7 +29,12 @@ export function TextInput({ sugar }: { sugar: Sugar<string> }) {
 
   return (
     <div>
-      <input type="text" ref={ref} />
+      <input
+        type="text"
+        ref={ref}
+        onChange={v => sugar.dispatchEvent('change', v.target.value)}
+        onBlur={v => sugar.dispatchEvent('blur', v.currentTarget.value)}
+        />
     </div>
   );
 }
