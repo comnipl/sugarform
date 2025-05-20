@@ -1,4 +1,3 @@
-
 export async function checkPending<T>(
   promise: Promise<T>
 ): Promise<{ resolved: false } | { resolved: true; value: T }> {
