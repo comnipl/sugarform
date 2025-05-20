@@ -23,6 +23,9 @@ jobs:
           turbo-cache-key: build
       - name: Run Build
         run: pnpm build
-      - name: Upload bundle-analysis to Codecov
+      - name: Upload bundle-analysis (all-@sugarform/core) to Codecov
         run: pnpm dlx @codecov/bundle-analyzer ./packages/core/dist --bundle-name=all-@sugarform/core --upload-token=${{ secrets.CODECOV_TOKEN }}
-
+      - name: Upload bundle-analysis (cjs-@sugarform/core) to Codecov
+        run: mkdir ./packages/core/dist-cjs && cp ./packages/core/dist/lib.cjs ./packages/core/dist-cjs && pnpm dlx @codecov/bundle-analyzer ./packages/core/dist-cjs --bundle-name=cjs-@sugarform/core --upload-token=${{ secrets.CODECOV_TOKEN }}
+      - name: Upload bundle-analysis (esm-@sugarform/core) to Codecov
+        run: mkdir ./packages/core/dist-esm && cp ./packages/core/dist/lib.js ./packages/core/dist-esm && pnpm dlx @codecov/bundle-analyzer ./packages/core/dist-esm --bundle-name=esm-@sugarform/core --upload-token=${{ secrets.CODECOV_TOKEN }}
