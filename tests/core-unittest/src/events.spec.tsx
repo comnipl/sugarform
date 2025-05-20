@@ -21,7 +21,7 @@ describe('Sugar#dispatchEvent', async () => {
 
     await userEvent.type(screen.getByRole('textbox'), 'test');
 
-    expect(result.current.get()).resolves.toStrictEqual({
+    await expect(result.current.get()).resolves.toStrictEqual({
       result: 'success',
       value: 'test',
     });
@@ -48,7 +48,7 @@ describe('Sugar#dispatchEvent', async () => {
 
     await userEvent.tab();
 
-    expect(result.current.get()).resolves.toStrictEqual({
+    await expect(result.current.get()).resolves.toStrictEqual({
       result: 'success',
       value: 'test',
     });
