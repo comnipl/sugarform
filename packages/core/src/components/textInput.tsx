@@ -1,5 +1,5 @@
-import { Sugar } from '@sugarform/core';
 import { useEffect, useRef } from 'react';
+import { Sugar } from '../lib';
 
 export function TextInput({
   sugar,
