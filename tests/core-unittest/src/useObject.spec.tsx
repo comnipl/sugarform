@@ -1,10 +1,11 @@
 import { useForm } from '@sugarform/core';
 import { render, renderHook, screen } from '@testing-library/react';
-import { describe, expect, test, vi } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { TextInput } from './components/textInput';
 import userEvent from '@testing-library/user-event';
+import { describeWithStrict } from '../util/describeWithStrict';
 
-describe('Sugar#useObject', () => {
+describeWithStrict('Sugar#useObject', () => {
   test('useObject should propagates onChange event', async () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })

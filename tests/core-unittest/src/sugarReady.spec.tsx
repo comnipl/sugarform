@@ -1,7 +1,8 @@
 import { useForm } from '@sugarform/core';
 import { renderHook, render } from '@testing-library/react';
-import { describe, expect, test } from 'vitest';
+import { expect, test } from 'vitest';
 import { TextInput } from './components/textInput';
+import { describeWithStrict } from '../util/describeWithStrict';
 
 async function checkPending<T>(
   promise: Promise<T>
@@ -21,7 +22,7 @@ async function checkPending<T>(
   return { resolved: true, value: value as T };
 }
 
-describe('Sugar#ready', () => {
+describeWithStrict('Sugar#ready', () => {
   test('getPromise is Pending until Ready', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
