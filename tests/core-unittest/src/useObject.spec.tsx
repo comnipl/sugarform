@@ -28,7 +28,7 @@ describe('Sugar#useObject', () => {
     await user.type(inputB, 'testB');
     expect(onChange).toHaveBeenCalledTimes(10);
 
-    expect(sugar.current.get()).resolves.toStrictEqual({
+    await expect(sugar.current.get()).resolves.toStrictEqual({
       result: 'success',
       value: { a: 'testA', b: 'testB' },
     });
@@ -63,7 +63,7 @@ describe('Sugar#useObject', () => {
     await user.tab();
     expect(onBlur).toHaveBeenCalledTimes(2);
 
-    expect(sugar.current.get()).resolves.toStrictEqual({
+    await expect(sugar.current.get()).resolves.toStrictEqual({
       result: 'success',
       value: { a: 'testA', b: 'testB' },
     });
