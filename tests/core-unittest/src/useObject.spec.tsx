@@ -1,12 +1,14 @@
-import { useForm } from "@sugarform/core";
-import { render, renderHook, screen } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
-import { TextInput } from "./components/textInput";
-import userEvent from "@testing-library/user-event";
+import { useForm } from '@sugarform/core';
+import { render, renderHook, screen } from '@testing-library/react';
+import { describe, expect, test, vi } from 'vitest';
+import { TextInput } from './components/textInput';
+import userEvent from '@testing-library/user-event';
 
 describe('Sugar#useObject', () => {
   test('useObject should propagates onChange event', async () => {
-    const { result: sugar } = renderHook(() => useForm({ template: { a: '', b: '' } }));
+    const { result: sugar } = renderHook(() =>
+      useForm({ template: { a: '', b: '' } })
+    );
     const { result: object } = renderHook(() => sugar.current.useObject());
 
     const onChange = vi.fn();
@@ -33,7 +35,9 @@ describe('Sugar#useObject', () => {
   });
 
   test('useObject should propagates onBlur event', async () => {
-    const { result: sugar } = renderHook(() => useForm({ template: { a: '', b: '' } }));
+    const { result: sugar } = renderHook(() =>
+      useForm({ template: { a: '', b: '' } })
+    );
     const { result: object } = renderHook(() => sugar.current.useObject());
 
     const onBlur = vi.fn();

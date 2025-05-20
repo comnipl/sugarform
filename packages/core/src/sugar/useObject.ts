@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Sugar,
   SugarGetResult,
@@ -22,15 +22,13 @@ export function useObject<T extends SugarValueObject>(
     }
   }
 
-
   useEffect(() => {
-
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
 
     sugars.current!.values().forEach((sugar) => {
-    //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
+      //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });

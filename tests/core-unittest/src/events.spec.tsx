@@ -1,8 +1,8 @@
-import { useForm } from "@sugarform/core";
-import { render, renderHook, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
-import { describe, expect, test, vi } from "vitest";
-import { TextInput } from "./components/textInput";
+import { useForm } from '@sugarform/core';
+import { render, renderHook, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, test, vi } from 'vitest';
+import { TextInput } from './components/textInput';
 
 describe('Sugar#dispatchEvent', async () => {
   test('Eventlisteners should be fired onChange', async () => {
@@ -28,7 +28,6 @@ describe('Sugar#dispatchEvent', async () => {
 
     expect(before_ready_listener).toHaveBeenCalledTimes(4);
     expect(after_ready_listener).toHaveBeenCalledTimes(4);
-
   });
 
   test('Eventlisteners should be fired onBlur', async () => {
@@ -56,7 +55,5 @@ describe('Sugar#dispatchEvent', async () => {
 
     expect(before_ready_listener).toHaveBeenCalledTimes(1);
     expect(after_ready_listener).toHaveBeenCalledTimes(1);
-
   });
-
-})
+});

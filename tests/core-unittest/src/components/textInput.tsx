@@ -1,7 +1,10 @@
 import { Sugar } from '@sugarform/core';
 import { useEffect, useRef } from 'react';
 
-export function TextInput({ sugar, ...props } : { sugar: Sugar<string> } & React.ComponentPropsWithoutRef<'input'>) {
+export function TextInput({
+  sugar,
+  ...props
+}: { sugar: Sugar<string> } & React.ComponentPropsWithoutRef<'input'>) {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -37,7 +40,7 @@ export function TextInput({ sugar, ...props } : { sugar: Sugar<string> } & React
         ref={ref}
         onChange={() => sugar.dispatchEvent('change')}
         onBlur={() => sugar.dispatchEvent('blur')}
-        />
+      />
     </div>
   );
 }

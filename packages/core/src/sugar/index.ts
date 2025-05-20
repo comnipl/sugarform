@@ -48,7 +48,6 @@ export class SugarInner<T extends SugarValue> {
 
   template: T;
 
-
   constructor(template: T) {
     const { promise: getPromise, resolve: resolveGetPromise } =
       Promise.withResolvers<SugarGetResult<T>>();
@@ -95,7 +94,6 @@ export class SugarInner<T extends SugarValue> {
     }
   }
 
-
   private eventTarget: EventTarget = new EventTarget();
 
   addEventListener<K extends keyof SugarEvent<T>>(
@@ -118,7 +116,6 @@ export class SugarInner<T extends SugarValue> {
   ) {
     this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
   }
-
 
   async ready(getter: SugarGetter<T>, setter: SugarSetter<T>) {
     if (this.status.status === 'unready') {
