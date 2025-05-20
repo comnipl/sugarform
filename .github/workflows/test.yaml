@@ -23,8 +23,16 @@ jobs:
           turbo-cache-key: test
       - name: Run Test
         run: pnpm vitest run --coverage
-      - uses: codecov/codecov-action@v5
+      - name: Upload test coverages to Codecov
+        uses: codecov/codecov-action@v5
         with:
           files: ./coverage/coverage-final.json
         env:
-            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          files: ./report/junit.xml
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
