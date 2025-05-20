@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   Sugar,
   SugarGetResult,
@@ -22,7 +22,19 @@ export function useObject<T extends SugarValueObject>(
     }
   }
 
+
   useEffect(() => {
+
+    // イベントを接続
+    const dispatchChange = () => sugar.dispatchEvent('change');
+    const dispatchBlur = () => sugar.dispatchEvent('blur');
+
+    sugars.current!.values().forEach((sugar) => {
+    //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
+      sugar.addEventListener('change', dispatchChange);
+      sugar.addEventListener('blur', dispatchBlur);
+    });
+
     sugar.ready(
       async () => {
         if (!matchSugars(sugar, sugars.current)) {
@@ -111,6 +123,12 @@ export function useObject<T extends SugarValueObject>(
     // アンマウント時にsugarの状態をunavailableにする。
     return () => {
       sugar.destroy();
+      if (sugars.current) {
+        sugars.current.values().forEach((sugar) => {
+          sugar.removeEventListener('change', dispatchChange);
+          sugar.removeEventListener('blur', dispatchBlur);
+        });
+      }
     };
   }, [sugar]);
 

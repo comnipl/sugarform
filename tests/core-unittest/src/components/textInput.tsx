@@ -1,7 +1,7 @@
 import { Sugar } from '@sugarform/core';
 import { useEffect, useRef } from 'react';
 
-export function TextInput({ sugar }: { sugar: Sugar<string> }) {
+export function TextInput({ sugar, ...props } : { sugar: Sugar<string> } & React.ComponentPropsWithoutRef<'input'>) {
   const ref = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -25,11 +25,14 @@ export function TextInput({ sugar }: { sugar: Sugar<string> }) {
         }
       );
     }
+
+    return () => sugar.destroy();
   }, [sugar]);
 
   return (
     <div>
       <input
+        {...props}
         type="text"
         ref={ref}
         onChange={() => sugar.dispatchEvent('change')}
