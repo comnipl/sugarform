@@ -1,5 +1,7 @@
 import {
+  CustomEventListener,
   Sugar,
+  SugarEvent,
   SugarGetResult,
   SugarGetter,
   SugarSetResult,
@@ -46,6 +48,7 @@ export class SugarInner<T extends SugarValue> {
 
   template: T;
 
+
   constructor(template: T) {
     const { promise: getPromise, resolve: resolveGetPromise } =
       Promise.withResolvers<SugarGetResult<T>>();
@@ -91,6 +94,31 @@ export class SugarInner<T extends SugarValue> {
         return this.status.setter(value);
     }
   }
+
+
+  private eventTarget: EventTarget = new EventTarget();
+
+  addEventListener<K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) {
+    this.eventTarget.addEventListener(type, listener as EventListener);
+  }
+
+  removeEventListener<K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) {
+    this.eventTarget.removeEventListener(type, listener as EventListener);
+  }
+
+  dispatchEvent<K extends keyof SugarEvent<T>>(
+    type: K,
+    detail: SugarEvent<T>[K]
+  ) {
+    this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
+  }
+
 
   async ready(getter: SugarGetter<T>, setter: SugarSetter<T>) {
     if (this.status.status === 'unready') {
