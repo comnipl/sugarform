@@ -23,4 +23,8 @@ jobs:
           turbo-cache-key: build
       - name: Run Build
         run: pnpm build
+      - name: Upload bundle-analysis to Codecov
+        run: pnpm dlx @codecov/bundle-analyzer ./packages/core/dist --bundle-name=all-@sugarform/core --upload-token=CODECOV_TOKEN
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
