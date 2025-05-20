@@ -114,7 +114,7 @@ export class SugarInner<T extends SugarValue> {
 
   dispatchEvent<K extends keyof SugarEvent<T>>(
     type: K,
-    detail: SugarEvent<T>[K]
+    detail: SugarEvent<T>[K] = undefined
   ) {
     this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
   }

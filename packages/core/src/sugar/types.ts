@@ -53,7 +53,7 @@ type SugarType<T extends SugarValue> = {
   ) => void;
   dispatchEvent: <K extends keyof SugarEvent<T>>(
     type: K,
-    detail: SugarEvent<T>[K]
+    detail?: SugarEvent<T>[K]
   ) => void;
 };
 
@@ -68,6 +68,6 @@ export type Sugar<T extends SugarValue> = {
 export type CustomEventListener<T> = (evt: CustomEvent<T>) => void;
 
 export type SugarEvent<T extends SugarValue> = {
-  change: T;
-  blur: T;
+  change: undefined;
+  blur: undefined;
 };

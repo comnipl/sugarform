@@ -24,18 +24,8 @@ describe('Sugar#dispatchEvent', async () => {
     });
 
     expect(before_ready_listener).toHaveBeenCalledTimes(4);
-    expect(before_ready_listener).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        detail: 'test',
-      })
-    );
 
     expect(after_ready_listener).toHaveBeenCalledTimes(4);
-    expect(after_ready_listener).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        detail: 'test',
-      })
-    );
 
   });
 
@@ -59,18 +49,8 @@ describe('Sugar#dispatchEvent', async () => {
     });
 
     expect(before_ready_listener).toHaveBeenCalledTimes(1);
-    expect(before_ready_listener).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        detail: 'test',
-      })
-    );
 
     expect(after_ready_listener).toHaveBeenCalledTimes(1);
-    expect(after_ready_listener).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        detail: 'test',
-      })
-    );
 
   });
 
