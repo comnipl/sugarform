@@ -1,9 +1,10 @@
-comment:
+coverage:
   status:
     project: off
     patch:
       default:
         target: 60%
+comment:
   layout: " diff, flags, files"
   behavior: default
   require_changes: false
