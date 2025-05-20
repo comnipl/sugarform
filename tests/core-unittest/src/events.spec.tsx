@@ -16,6 +16,9 @@ describe('Sugar#dispatchEvent', async () => {
     const after_ready_listener = vi.fn();
     result.current.addEventListener('change', after_ready_listener);
 
+    expect(before_ready_listener).toHaveBeenCalledTimes(0);
+    expect(after_ready_listener).toHaveBeenCalledTimes(0);
+
     await userEvent.type(screen.getByRole('textbox'), 'test');
 
     expect(result.current.get()).resolves.toStrictEqual({
@@ -24,7 +27,6 @@ describe('Sugar#dispatchEvent', async () => {
     });
 
     expect(before_ready_listener).toHaveBeenCalledTimes(4);
-
     expect(after_ready_listener).toHaveBeenCalledTimes(4);
 
   });
@@ -41,6 +43,10 @@ describe('Sugar#dispatchEvent', async () => {
     result.current.addEventListener('blur', after_ready_listener);
 
     await userEvent.type(screen.getByRole('textbox'), 'test');
+
+    expect(before_ready_listener).toHaveBeenCalledTimes(0);
+    expect(after_ready_listener).toHaveBeenCalledTimes(0);
+
     await userEvent.tab();
 
     expect(result.current.get()).resolves.toStrictEqual({
@@ -49,7 +55,6 @@ describe('Sugar#dispatchEvent', async () => {
     });
 
     expect(before_ready_listener).toHaveBeenCalledTimes(1);
-
     expect(after_ready_listener).toHaveBeenCalledTimes(1);
 
   });
