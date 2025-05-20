@@ -1,8 +1,7 @@
-import { useForm } from '@sugarform/core';
+import { TextInput, useForm } from '@sugarform/core';
 import { render, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { expect, test, vi } from 'vitest';
-import { TextInput } from './components/textInput';
 import { describeWithStrict } from '../util/describeWithStrict';
 
 describeWithStrict('Sugar#dispatchEvent', () => {

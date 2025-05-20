@@ -33,6 +33,7 @@ export type SugarUseObjectResult<T extends SugarValueObject> = {
     [K in keyof T]: Sugar<T[K]>;
   };
 };
+
 export type SugarUseObject<T extends SugarValue> = T extends SugarValueObject
   ? () => SugarUseObjectResult<T>
   : never;

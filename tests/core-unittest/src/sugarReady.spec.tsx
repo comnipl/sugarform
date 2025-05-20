@@ -1,7 +1,6 @@
-import { useForm } from '@sugarform/core';
+import { TextInput, useForm } from '@sugarform/core';
 import { renderHook, render } from '@testing-library/react';
 import { expect, test } from 'vitest';
-import { TextInput } from './components/textInput';
 import { describeWithStrict } from '../util/describeWithStrict';
 
 async function checkPending<T>(
