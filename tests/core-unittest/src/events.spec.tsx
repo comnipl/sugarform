@@ -5,7 +5,7 @@ import { expect, test, vi } from 'vitest';
 import { TextInput } from './components/textInput';
 import { describeWithStrict } from '../util/describeWithStrict';
 
-describeWithStrict('Sugar#dispatchEvent', async () => {
+describeWithStrict('Sugar#dispatchEvent', () => {
   test('Eventlisteners should be fired onChange', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
