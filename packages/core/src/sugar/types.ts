@@ -67,7 +67,7 @@ export type Sugar<T extends SugarValue> = {
 
 export type CustomEventListener<T> = (evt: CustomEvent<T>) => void;
 
-export type SugarEvent<T extends SugarValue> = {
+export type SugarEvent<_T extends SugarValue> = {
   change: undefined;
   blur: undefined;
 };
