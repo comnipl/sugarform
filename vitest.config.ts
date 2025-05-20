@@ -23,7 +23,7 @@ export default defineConfig({
       include: ['packages/core/src/**/*.{ts,tsx,js,jsx}'],
       exclude: ['**/node_modules/**', 'tests/**'],
 
-      reporter: ['text', 'lcov', 'html'],
+      reporter: ['text', 'lcov', 'html', 'json'],
       reportsDirectory: 'coverage',
     },
   },

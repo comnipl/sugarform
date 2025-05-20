@@ -23,4 +23,8 @@ jobs:
           turbo-cache-key: test
       - name: Run Test
         run: pnpm vitest run --coverage
-
+      - uses: codecov/codecov-action@v5
+        with:
+          files: ./coverage/coverage-final.json
+        env:
+            CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
