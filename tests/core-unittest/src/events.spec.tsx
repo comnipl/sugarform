@@ -1,10 +1,11 @@
 import { useForm } from '@sugarform/core';
 import { render, renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, test, vi } from 'vitest';
+import { expect, test, vi } from 'vitest';
 import { TextInput } from './components/textInput';
+import { describeWithStrict } from '../util/describeWithStrict';
 
-describe('Sugar#dispatchEvent', async () => {
+describeWithStrict('Sugar#dispatchEvent', async () => {
   test('Eventlisteners should be fired onChange', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
