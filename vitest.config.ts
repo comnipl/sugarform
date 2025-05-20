@@ -17,6 +17,11 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
 
+    reporters: [
+    'default',
+      ['junit', { outputFile: 'report/junit.xml' }],
+    ],
+
     coverage: {
       provider: 'istanbul',
       all: true,
