@@ -43,6 +43,18 @@ type SugarType<T extends SugarValue> = {
   ready: (getter: SugarGetter<T>, setter: SugarSetter<T>) => Promise<void>;
   destroy: () => void;
   useObject: SugarUseObject<T>;
+  addEventListener: <K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) => void;
+  removeEventListener: <K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) => void;
+  dispatchEvent: <K extends keyof SugarEvent<T>>(
+    type: K,
+    detail?: SugarEvent<T>[K]
+  ) => void;
 };
 
 // useObjectなどの、Tが条件を満たしている場合のみに使えるメソッドを補完に表示させないように、
@@ -51,4 +63,11 @@ export type Sugar<T extends SugarValue> = {
   [K in keyof SugarType<T> as SugarType<T>[K] extends never
     ? never
     : K]: SugarType<T>[K];
+};
+
+export type CustomEventListener<T> = (evt: CustomEvent<T>) => void;
+
+export type SugarEvent<_T extends SugarValue> = {
+  change: undefined;
+  blur: undefined;
 };

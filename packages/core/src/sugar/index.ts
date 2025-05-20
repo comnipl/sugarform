@@ -1,5 +1,7 @@
 import {
+  CustomEventListener,
   Sugar,
+  SugarEvent,
   SugarGetResult,
   SugarGetter,
   SugarSetResult,
@@ -90,6 +92,29 @@ export class SugarInner<T extends SugarValue> {
       case 'ready':
         return this.status.setter(value);
     }
+  }
+
+  private eventTarget: EventTarget = new EventTarget();
+
+  addEventListener<K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) {
+    this.eventTarget.addEventListener(type, listener as EventListener);
+  }
+
+  removeEventListener<K extends keyof SugarEvent<T>>(
+    type: K,
+    listener: CustomEventListener<SugarEvent<T>[K]>
+  ) {
+    this.eventTarget.removeEventListener(type, listener as EventListener);
+  }
+
+  dispatchEvent<K extends keyof SugarEvent<T>>(
+    type: K,
+    detail: SugarEvent<T>[K] = undefined
+  ) {
+    this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
   }
 
   async ready(getter: SugarGetter<T>, setter: SugarSetter<T>) {
