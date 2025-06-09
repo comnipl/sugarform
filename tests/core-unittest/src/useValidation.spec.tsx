@@ -6,7 +6,9 @@ import { describeWithStrict } from '../util/describeWithStrict';
 
 describeWithStrict('Sugar#useValidation', () => {
   test('validation triggered on blur until success', async () => {
-    const { result: sugar } = renderHook(() => useForm<string>({ template: '' }));
+    const { result: sugar } = renderHook(() =>
+      useForm<string>({ template: '' })
+    );
     const { result: validations } = renderHook(() =>
       sugar.current.useValidation<string>((value, fail) => {
         if (value === '') fail('required', 'blur');
@@ -29,7 +31,9 @@ describeWithStrict('Sugar#useValidation', () => {
   });
 
   test('get(true) returns validation_fault until valid', async () => {
-    const { result: sugar } = renderHook(() => useForm<string>({ template: '' }));
+    const { result: sugar } = renderHook(() =>
+      useForm<string>({ template: '' })
+    );
     renderHook(() =>
       sugar.current.useValidation<string>((value, fail) => {
         if (value === '') fail('required', 'blur');
@@ -59,7 +63,9 @@ describeWithStrict('Sugar#useValidation', () => {
   });
 
   test('age must be at least 18', async () => {
-    const { result: sugar } = renderHook(() => useForm<string>({ template: '' }));
+    const { result: sugar } = renderHook(() =>
+      useForm<string>({ template: '' })
+    );
     renderHook(() =>
       sugar.current.useValidation<string>((value, fail) => {
         const date = new Date(value);
@@ -83,8 +89,16 @@ describeWithStrict('Sugar#useValidation', () => {
 
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
     const now = new Date();
-    const underage = new Date(now.getFullYear() - 17, now.getMonth(), now.getDate());
-    const adult = new Date(now.getFullYear() - 18, now.getMonth(), now.getDate() - 1);
+    const underage = new Date(
+      now.getFullYear() - 17,
+      now.getMonth(),
+      now.getDate()
+    );
+    const adult = new Date(
+      now.getFullYear() - 18,
+      now.getMonth(),
+      now.getDate() - 1
+    );
 
     await userEvent.type(input, fmt(underage));
     await userEvent.tab();
