@@ -9,8 +9,10 @@ import {
   SugarUseObject,
   SugarValue,
   SugarValueObject,
+  ValidationPhase,
 } from './types';
 import { useObject } from './useObject';
+import { useValidation } from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -67,7 +69,7 @@ export class SugarInner<T extends SugarValue> {
     this.template = template;
   }
 
-  get(): Promise<SugarGetResult<T>> {
+  get(submit: boolean = false): Promise<SugarGetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
         return Promise.resolve({
@@ -76,7 +78,15 @@ export class SugarInner<T extends SugarValue> {
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status.getter();
+        return this.status.getter().then(async (res) => {
+          if (res.result === 'success' && submit) {
+            const ok = await this.runValidators(res.value, 'submit');
+            if (!ok) {
+              return { result: 'validation_fault' } as SugarGetResult<T>;
+            }
+          }
+          return res;
+        });
     }
   }
 
@@ -95,6 +105,35 @@ export class SugarInner<T extends SugarValue> {
   }
 
   private eventTarget: EventTarget = new EventTarget();
+
+  private validators: Set<
+    (value: T, phase: ValidationPhase) => Promise<boolean>
+  > = new Set();
+
+  addValidator(
+    validator: (value: T, phase: ValidationPhase) => Promise<boolean>
+  ) {
+    this.validators.add(validator);
+  }
+
+  removeValidator(
+    validator: (value: T, phase: ValidationPhase) => Promise<boolean>
+  ) {
+    this.validators.delete(validator);
+  }
+
+  private async runValidators(
+    value: T,
+    phase: ValidationPhase
+  ): Promise<boolean> {
+    if (this.validators.size === 0) {
+      return true;
+    }
+    const results = await Promise.all(
+      [...this.validators].map((v) => v(value, phase))
+    );
+    return results.every((r) => r);
+  }
 
   addEventListener<K extends keyof SugarEvent<T>>(
     type: K,
@@ -162,4 +201,17 @@ export class SugarInner<T extends SugarValue> {
 
   useObject: SugarUseObject<T> = (() =>
     useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
+
+  useValidation: <V>(
+    validator: (
+      value: T,
+      fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
+    ) => void | Promise<void>
+  ) => V[] = ((validator) =>
+    useValidation(this as Sugar<T>, validator)) as <V>(
+    validator: (
+      value: T,
+      fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
+    ) => void | Promise<void>
+  ) => V[];
 }
