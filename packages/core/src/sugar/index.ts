@@ -123,12 +123,13 @@ export class SugarInner<T extends SugarValue> {
       if (this.status.lock) {
         return;
       }
-      this.status.lock = true;
+      const status = this.status;
+      status.lock = true;
 
-      this.status.resolveSetPromise(
-        await setter(this.status.recentValue ?? this.template)
+      status.resolveSetPromise(
+        await setter(status.recentValue ?? this.template)
       );
-      this.status.resolveGetPromise(await getter());
+      status.resolveGetPromise(await getter());
     }
 
     this.status = {
@@ -146,8 +147,10 @@ export class SugarInner<T extends SugarValue> {
         };
         break;
       case 'unready':
-        this.status.resolveGetPromise({ result: 'unavailable' });
-        this.status.resolveSetPromise({ result: 'unavailable' });
+        if (!this.status.lock) {
+          this.status.resolveGetPromise({ result: 'unavailable' });
+          this.status.resolveSetPromise({ result: 'unavailable' });
+        }
         this.status = {
           status: 'unavailable',
         };
