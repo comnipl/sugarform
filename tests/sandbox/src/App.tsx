@@ -3,6 +3,18 @@ import { useCallback } from 'react';
 import './App.css';
 import { useForm, TextInput, NumberInput, type Sugar } from '@sugarform/core';
 
+type Birthday = {
+  year: number;
+  month: number;
+  day: number;
+};
+
+type Person = {
+  firstName: string;
+  lastName: string;
+  birthday: Birthday;
+};
+
 type FormType = {
   person_a: Person;
   person_b: Person;
@@ -14,10 +26,12 @@ function App() {
       person_a: {
         firstName: '',
         lastName: '',
+        birthday: { year: NaN, month: NaN, day: NaN },
       },
       person_b: {
         firstName: '',
         lastName: '',
+        birthday: { year: NaN, month: NaN, day: NaN },
       },
     },
   });
@@ -41,15 +55,9 @@ function App() {
         get
       </button>
       <hr />
-      <BirthdayExample />
     </>
   );
 }
-
-type Person = {
-  firstName: string;
-  lastName: string;
-};
 
 function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
   const { fields } = sugar.useObject();
@@ -64,24 +72,15 @@ function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
         Last Name:
         <TextInput sugar={fields.lastName} />
       </label>
+      <BirthdayInput sugar={fields.birthday} />
     </div>
   );
 }
 
-type Birthday = {
-  year: number;
-  month: number;
-  day: number;
-};
+function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
+  const { fields } = sugar.useObject();
 
-function BirthdayExample() {
-  const birthdaySugar = useForm<Birthday>({
-    template: { year: NaN, month: NaN, day: NaN },
-  });
-
-  const { fields } = birthdaySugar.useObject();
-
-  const errors = birthdaySugar.useValidation<string>(
+  const errors = sugar.useValidation<string>(
     useCallback((value, fail) => {
       const complete =
         !Number.isNaN(value.year) &&
@@ -111,7 +110,6 @@ function BirthdayExample() {
 
   return (
     <div>
-      <h2>Birthday</h2>
       <label>
         Year:
         <NumberInput sugar={fields.year} />
@@ -124,15 +122,6 @@ function BirthdayExample() {
         Day:
         <NumberInput sugar={fields.day} />
       </label>
-      <button
-        type="button"
-        onClick={async () => {
-          const result = await birthdaySugar.get(true);
-          console.log(result);
-        }}
-      >
-        get birthday
-      </button>
       {errors.map((e, i) => (
         <div key={i} className="error">
           {e}
