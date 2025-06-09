@@ -7,6 +7,7 @@ import {
   SugarSetResult,
   SugarSetter,
   SugarUseObject,
+  SugarUseValidation,
   SugarValue,
   SugarValueObject,
   ValidationPhase,
@@ -202,12 +203,12 @@ export class SugarInner<T extends SugarValue> {
   useObject: SugarUseObject<T> = (() =>
     useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
 
-  useValidation = <V>(
+  useValidation: SugarUseValidation<T, unknown> = (<V>(
     validator: (
       value: T,
       fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
     ) => void | Promise<void>
   ) =>
     // eslint-disable-next-line react-hooks/rules-of-hooks -- hook delegation
-    useValidation(this as Sugar<T>, validator);
+    useValidation(this as Sugar<T>, validator)) as SugarUseValidation<T, V>;
 }
