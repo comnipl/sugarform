@@ -35,6 +35,7 @@ export function useValidation<T, V>(
 
   const wrapper = async (value: T, phase: ValidationPhase) => run(value, phase);
 
+  /* eslint-disable react-hooks/exhaustive-deps -- validatorRef handles changes */
   useEffect(() => {
     const inner = sugar as unknown as SugarInner<T>;
     inner.addValidator(wrapper);
@@ -60,6 +61,7 @@ export function useValidation<T, V>(
       sugar.removeEventListener('blur', handleBlur);
     };
   }, [sugar]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return validations;
 }

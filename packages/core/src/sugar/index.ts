@@ -7,7 +7,6 @@ import {
   SugarSetResult,
   SugarSetter,
   SugarUseObject,
-  SugarUseValidation,
   SugarValue,
   SugarValueObject,
   ValidationPhase,
@@ -79,17 +78,15 @@ export class SugarInner<T extends SugarValue> {
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status
-          .getter()
-          .then(async (res) => {
-            if (res.result === 'success' && submit) {
-              const ok = await this.runValidators(res.value, 'submit');
-              if (!ok) {
-                return { result: 'validation_fault' } as SugarGetResult<T>;
-              }
+        return this.status.getter().then(async (res) => {
+          if (res.result === 'success' && submit) {
+            const ok = await this.runValidators(res.value, 'submit');
+            if (!ok) {
+              return { result: 'validation_fault' } as SugarGetResult<T>;
             }
-            return res;
-          });
+          }
+          return res;
+        });
     }
   }
 
@@ -113,7 +110,9 @@ export class SugarInner<T extends SugarValue> {
     (value: T, phase: ValidationPhase) => Promise<boolean>
   > = new Set();
 
-  addValidator(validator: (value: T, phase: ValidationPhase) => Promise<boolean>) {
+  addValidator(
+    validator: (value: T, phase: ValidationPhase) => Promise<boolean>
+  ) {
     this.validators.add(validator);
   }
 
@@ -123,7 +122,10 @@ export class SugarInner<T extends SugarValue> {
     this.validators.delete(validator);
   }
 
-  private async runValidators(value: T, phase: ValidationPhase): Promise<boolean> {
+  private async runValidators(
+    value: T,
+    phase: ValidationPhase
+  ): Promise<boolean> {
     if (this.validators.size === 0) {
       return true;
     }
@@ -206,8 +208,6 @@ export class SugarInner<T extends SugarValue> {
       fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
     ) => void | Promise<void>
   ) =>
-    useValidation(this as Sugar<T>, validator)) as SugarUseValidation<
-    T,
-    V
-  >;
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- hook delegation
+    useValidation(this as Sugar<T>, validator)) as SugarUseValidation<T, V>;
 }
