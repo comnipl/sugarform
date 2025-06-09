@@ -7,10 +7,13 @@ import {
   SugarSetResult,
   SugarSetter,
   SugarUseObject,
+  SugarUseValidation,
+  FailFn,
   SugarValue,
   SugarValueObject,
 } from './types';
 import { useObject } from './useObject';
+import { useValidation } from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -67,7 +70,10 @@ export class SugarInner<T extends SugarValue> {
     this.template = template;
   }
 
-  get(): Promise<SugarGetResult<T>> {
+  get(submit = false): Promise<SugarGetResult<T>> {
+    if (submit) {
+      this.dispatchEvent('submit');
+    }
     switch (this.status.status) {
       case 'unavailable':
         return Promise.resolve({
@@ -76,7 +82,7 @@ export class SugarInner<T extends SugarValue> {
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status.getter();
+        return this.status.getter(submit);
     }
   }
 
@@ -162,4 +168,10 @@ export class SugarInner<T extends SugarValue> {
 
   useObject: SugarUseObject<T> = (() =>
     useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
+
+  useValidation: SugarUseValidation<T> = (<V>(
+    validator: (value: T, fail: FailFn<V>) => void | Promise<void>,
+    deps?: React.DependencyList
+  ) =>
+    useValidation(this as Sugar<T>, validator, deps)) as SugarUseValidation<T>;
 }
