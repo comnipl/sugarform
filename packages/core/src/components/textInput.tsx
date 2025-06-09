@@ -10,7 +10,7 @@ export function TextInput({
   useEffect(() => {
     if (ref.current) {
       sugar.ready(
-        (_submit) => {
+        (_stage) => {
           if (!ref.current) {
             return Promise.resolve({ result: 'unavailable' });
           }

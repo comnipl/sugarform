@@ -9,6 +9,7 @@ import {
   SugarUseObject,
   SugarUseValidation,
   FailFn,
+  ValidationStage,
   SugarValue,
   SugarValueObject,
 } from './types';
@@ -50,6 +51,9 @@ export class SugarInner<T extends SugarValue> {
       };
 
   template: T;
+  private validators: Set<
+    (stage: ValidationStage, value: T) => Promise<boolean>
+  > = new Set();
 
   constructor(template: T) {
     const { promise: getPromise, resolve: resolveGetPromise } =
@@ -70,20 +74,48 @@ export class SugarInner<T extends SugarValue> {
     this.template = template;
   }
 
-  get(submit = false): Promise<SugarGetResult<T>> {
-    if (submit) {
-      this.dispatchEvent('submit');
-    }
+  registerValidator(
+    fn: (stage: ValidationStage, value: T) => Promise<boolean>
+  ) {
+    this.validators.add(fn);
+  }
+
+  unregisterValidator(
+    fn: (stage: ValidationStage, value: T) => Promise<boolean>
+  ) {
+    this.validators.delete(fn);
+  }
+
+  private async runValidators(stage: ValidationStage, value: T) {
+    if (this.validators.size === 0) return true;
+    const results = await Promise.all(
+      [...this.validators].map((v) => v(stage, value))
+    );
+    return results.every((r) => r);
+  }
+
+  async getInternal(stage: ValidationStage = 'input'): Promise<SugarGetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
-        return Promise.resolve({
-          result: 'unavailable',
-        });
+        return { result: 'unavailable' };
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status.getter(submit);
+        return this.status.getter(stage);
     }
+  }
+
+  async get(stage: ValidationStage = 'input'): Promise<SugarGetResult<T>> {
+    const result = await this.getInternal(stage);
+    if (result.result !== 'success') {
+      return result;
+    }
+
+    const ok = await this.runValidators(stage, result.value);
+    if (!ok) {
+      return { result: 'validation_fault' };
+    }
+    return result;
   }
 
   set(value: T): Promise<SugarSetResult<T>> {
@@ -135,7 +167,7 @@ export class SugarInner<T extends SugarValue> {
       status.resolveSetPromise(
         await setter(status.recentValue ?? this.template)
       );
-      status.resolveGetPromise(await getter());
+      status.resolveGetPromise(await getter('input'));
     }
 
     this.status = {

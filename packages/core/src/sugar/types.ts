@@ -27,7 +27,7 @@ export type ValidationStage = 'input' | 'blur' | 'submit';
 export type FailFn<V> = (value: V, stage?: ValidationStage) => void;
 
 export type SugarGetter<T extends SugarValue> = (
-  submit?: boolean
+  stage?: ValidationStage
 ) => Promise<SugarGetResult<T>>;
 export type SugarSetter<T extends SugarValue> = (
   value: T

@@ -48,7 +48,7 @@ function App() {
       <button
         type="button"
         onClick={async () => {
-          const result = await sugar.get();
+          const result = await sugar.get('submit');
           console.log(result);
         }}
       >
@@ -81,7 +81,7 @@ function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
   const { fields } = sugar.useObject();
 
   const errors = sugar.useValidation<string>(
-    useCallback((value, fail) => {
+    useCallback(async (value, fail) => {
       const complete =
         !Number.isNaN(value.year) &&
         !Number.isNaN(value.month) &&

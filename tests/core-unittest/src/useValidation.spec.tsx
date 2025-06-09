@@ -23,7 +23,7 @@ describeWithStrict('Sugar#useValidation', () => {
     );
     const { result: object } = renderHook(() => sugar.current.useObject());
 
-    const validator = (
+    const validator = async (
       value: Birthday,
       fail: (v: unknown, s?: string) => void
     ) => {
@@ -72,7 +72,7 @@ describeWithStrict('Sugar#useValidation', () => {
     expect(errors.current).toStrictEqual([]);
 
     await act(async () => {
-      await sugar.current.get(true);
+      await sugar.current.get('submit');
     });
     await waitFor(() =>
       expect(errors.current).toStrictEqual([
@@ -102,10 +102,16 @@ describeWithStrict('Sugar#useValidation', () => {
     );
     const { result: obj } = renderHook(() => sugar.current.useObject());
 
-    const validateA = (v: string, fail: (err: string, s?: string) => void) => {
+    const validateA = async (
+      v: string,
+      fail: (err: string, s?: string) => void
+    ) => {
       if (v === '') fail('required', 'submit');
     };
-    const validateB = (v: string, fail: (err: string, s?: string) => void) => {
+    const validateB = async (
+      v: string,
+      fail: (err: string, s?: string) => void
+    ) => {
       if (v === '') fail('required', 'submit');
     };
 
@@ -132,10 +138,32 @@ describeWithStrict('Sugar#useValidation', () => {
     expect(errB.current).toStrictEqual([]);
 
     await act(async () => {
-      await sugar.current.get(true);
+      await sugar.current.get('submit');
     });
 
     await waitFor(() => expect(errA.current).toStrictEqual([]));
     await waitFor(() => expect(errB.current).toStrictEqual(['required']));
+  });
+
+  test('get returns validation_fault when validation fails', async () => {
+    const { result: sugar } = renderHook(() =>
+      useForm({ template: { a: '' } })
+    );
+    const { result: obj } = renderHook(() => sugar.current.useObject());
+
+    const validate = async (
+      v: string,
+      fail: (e: string, s?: string) => void
+    ) => {
+      if (v === '') fail('required', 'submit');
+    };
+    render(<TextInput sugar={obj.current.fields.a} placeholder="a" />);
+    renderHook(() => obj.current.fields.a.useValidation(validate));
+
+    await act(async () => {});
+
+    await expect(sugar.current.get('submit')).resolves.toStrictEqual({
+      result: 'validation_fault',
+    });
   });
 });
