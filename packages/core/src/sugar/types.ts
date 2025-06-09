@@ -44,6 +44,12 @@ type SugarType<T extends SugarValue> = {
   ready: (getter: SugarGetter<T>, setter: SugarSetter<T>) => Promise<void>;
   destroy: () => void;
   useObject: SugarUseObject<T>;
+  useValidation: <V>(
+    validator: (
+      value: T,
+      fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
+    ) => void | Promise<void>
+  ) => V[];
   addEventListener: <K extends keyof SugarEvent<T>>(
     type: K,
     listener: CustomEventListener<SugarEvent<T>[K]>
@@ -72,3 +78,12 @@ export type SugarEvent<_T extends SugarValue> = {
   change: undefined;
   blur: undefined;
 };
+
+export type ValidationPhase = 'input' | 'blur' | 'submit';
+
+export type SugarUseValidation<T extends SugarValue, V> = (
+  validator: (
+    value: T,
+    fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
+  ) => void | Promise<void>
+) => V[];
