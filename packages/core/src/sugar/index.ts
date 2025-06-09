@@ -139,10 +139,21 @@ export class SugarInner<T extends SugarValue> {
   }
 
   destroy() {
-    if (this.status.status === 'ready') {
-      this.status = {
-        status: 'unavailable',
-      };
+    switch (this.status.status) {
+      case 'ready':
+        this.status = {
+          status: 'unavailable',
+        };
+        break;
+      case 'unready':
+        this.status.resolveGetPromise({ result: 'unavailable' });
+        this.status.resolveSetPromise({ result: 'unavailable' });
+        this.status = {
+          status: 'unavailable',
+        };
+        break;
+      case 'unavailable':
+        break;
     }
   }
 
