@@ -5,7 +5,7 @@ import userEvent from '@testing-library/user-event';
 import { describeWithStrict } from '../util/describeWithStrict';
 
 describeWithStrict('Sugar#useObject', () => {
-  test('useObject should propagates onChange event', async () => {
+  test('useObject should propagate onChange event', async () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })
     );
@@ -34,7 +34,7 @@ describeWithStrict('Sugar#useObject', () => {
     });
   });
 
-  test('useObject should propagates onBlur event', async () => {
+  test('useObject should propagate onBlur event', async () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })
     );
