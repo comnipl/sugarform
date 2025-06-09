@@ -13,7 +13,7 @@ import {
   ValidationPhase,
 } from './types';
 import { useObject } from './useObject';
-import { useValidation } from './useValidation';
+import { useValidation as useValidationHook } from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -203,10 +203,12 @@ export class SugarInner<T extends SugarValue> {
   useObject: SugarUseObject<T> = (() =>
     useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
 
-  useValidation: SugarUseValidation<T, unknown> = (<V>(
+  useValidation<V>(
     validator: (
       value: T,
       fail: (reason: V, phase?: ValidationPhase) => void | Promise<void>
     ) => void | Promise<void>
-  ) => useValidation(this as Sugar<T>, validator)) as SugarUseValidation<T, V>;
+  ): V[] {
+    return useValidationHook(this as Sugar<T>, validator);
+  }
 }

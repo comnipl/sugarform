@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Sugar } from './types';
 import type { ValidationPhase } from './types';
 import { SugarInner } from '.';
@@ -21,19 +21,25 @@ export function useValidation<T, V>(
 
   const [validations, setValidations] = useState<V[]>([]);
 
-  const run = async (value: T, phase: ValidationPhase): Promise<boolean> => {
-    const fails: V[] = [];
-    const fail = (v: V, p: ValidationPhase = 'submit') => {
-      if (phaseWeight[phase] >= phaseWeight[p]) {
-        fails.push(v);
-      }
-    };
-    await validatorRef.current(value, fail);
-    setValidations(fails);
-    return fails.length === 0;
-  };
+  const run = useCallback(
+    async (value: T, phase: ValidationPhase): Promise<boolean> => {
+      const fails: V[] = [];
+      const fail = (v: V, p: ValidationPhase = 'submit') => {
+        if (phaseWeight[phase] >= phaseWeight[p]) {
+          fails.push(v);
+        }
+      };
+      await validatorRef.current(value, fail);
+      setValidations(fails);
+      return fails.length === 0;
+    },
+    []
+  );
 
-  const wrapper = async (value: T, phase: ValidationPhase) => run(value, phase);
+  const wrapper = useCallback(
+    async (value: T, phase: ValidationPhase) => run(value, phase),
+    [run]
+  );
 
   useEffect(() => {
     const inner = sugar as unknown as SugarInner<T>;
@@ -59,7 +65,7 @@ export function useValidation<T, V>(
       sugar.removeEventListener('change', handleChange);
       sugar.removeEventListener('blur', handleBlur);
     };
-  }, [sugar]);
+  }, [sugar, run, wrapper]);
 
   return validations;
 }
