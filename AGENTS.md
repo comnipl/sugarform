@@ -13,6 +13,10 @@ still show the attempt and mention the failure in your PR message.
 
 ## Additional rules
 
+- Write commit titles using the Conventional Commits format
+  `<type>(<scope>): <message>`. Use the current package name as the scope,
+  for example `feat(core): add new feature`.
+
 - When disabling ESLint via comments, explain the legitimate reason on the line
   immediately before the disabling comment.
 - When escaping the TypeScript type system (e.g. using `!` or `as unknown as`),
