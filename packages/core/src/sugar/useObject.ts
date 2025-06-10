@@ -30,18 +30,31 @@ export function useObject<T extends SugarValueObject>(
     for (const key in template) {
       sugars.current.set(key, new SugarInner(template[key]) as Sugar<unknown>);
     }
-    (sugar as SugarInner<T>).nestedSugars = sugars.current;
   }
 
   useEffect(() => {
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
+    const handleTemplateChange = (evt: CustomEvent<T>) => {
+      const newTemplate = evt.detail;
+      if (typeof newTemplate === 'object' && newTemplate !== null) {
+        for (const [key, nestedSugar] of sugars.current!.entries()) {
+          if (key in newTemplate) {
+            const nestedValue = (newTemplate as Record<string, unknown>)[key];
+            (nestedSugar as SugarInner<unknown>).template = nestedValue;
+          }
+        }
+      }
+    };
+
     [...sugars.current!.values()].forEach((sugar) => {
       //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });
+
+    sugar.addEventListener('templateChange', handleTemplateChange);
 
     sugar.ready(
       async (submit) => {
@@ -137,6 +150,7 @@ export function useObject<T extends SugarValueObject>(
           sugar.removeEventListener('blur', dispatchBlur);
         });
       }
+      sugar.removeEventListener('templateChange', handleTemplateChange);
     };
   }, [sugar]);
 
