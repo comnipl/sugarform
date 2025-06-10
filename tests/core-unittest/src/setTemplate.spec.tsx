@@ -83,19 +83,19 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
     await act(async () => {});
 
-    await result.current.setTemplate({ a: 'new', b: 'new' }, true);
+    await result.current.setTemplate({ a: 'new-a', b: 'new-b' }, true);
 
     const getResult = await result.current.get();
     expect(getResult).toStrictEqual({
       result: 'success',
-      value: { a: 'new', b: 'new' },
+      value: { a: 'new-a', b: 'new-b' },
     });
 
     expect(
       (result.current as SugarInner<{ a: string; b: string }>).template
-    ).toStrictEqual({ a: 'new', b: 'new' });
+    ).toStrictEqual({ a: 'new-a', b: 'new-b' });
 
-    expect((obj.current.fields.a as SugarInner<string>).template).toBe('new');
-    expect((obj.current.fields.b as SugarInner<string>).template).toBe('new');
+    expect((obj.current.fields.a as SugarInner<string>).template).toBe('new-a');
+    expect((obj.current.fields.b as SugarInner<string>).template).toBe('new-b');
   });
 });
