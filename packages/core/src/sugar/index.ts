@@ -20,6 +20,8 @@ import {
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
   // そのあいだに、get/setが呼びだされた場合、状態がReadyになるまで待機して実行します。
+  private isNestedField = false;
+  private wasSetCalled = false;
   private status:
     | {
         status: 'unready';
@@ -122,7 +124,7 @@ export class SugarInner<T extends SugarValue> {
     return result;
   }
 
-  set(value: T): Promise<SugarSetResult<T>> {
+  set(value: T, internal = false): Promise<SugarSetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
         return Promise.resolve({
@@ -130,9 +132,15 @@ export class SugarInner<T extends SugarValue> {
         });
       case 'unready':
         this.status.recentValue = value;
+        this.wasSetCalled = !internal;
         return this.status.setPromise;
       case 'ready':
-        return this.status.setter(value);
+        return this.status.setter(value).then((result) => {
+          if (result.result === 'success') {
+            this.dispatchEvent('change');
+          }
+          return result;
+        });
     }
   }
 
@@ -168,9 +176,15 @@ export class SugarInner<T extends SugarValue> {
       const status = this.status;
       status.lock = true;
 
-      status.resolveSetPromise(
-        await setter(status.recentValue ?? this.template)
-      );
+      const setResult = await setter(status.recentValue ?? this.template);
+      status.resolveSetPromise(setResult);
+      if (
+        setResult.result === 'success' &&
+        status.recentValue !== null &&
+        this.wasSetCalled
+      ) {
+        this.dispatchEvent('change');
+      }
       status.resolveGetPromise(await getter(false));
     }
 
@@ -200,6 +214,10 @@ export class SugarInner<T extends SugarValue> {
       case 'unavailable':
         break;
     }
+  }
+
+  markAsNestedField() {
+    this.isNestedField = true;
   }
 
   useObject: SugarUseObject<T> = (() =>
