@@ -1,5 +1,5 @@
 import { TextInput, useForm } from '@sugarform/core';
-import { renderHook, render, act, waitFor } from '@testing-library/react';
+import { renderHook, render, act } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import { describeWithStrict } from '../util/describeWithStrict';
 import { SugarInner } from '../../../packages/core/src/sugar/index';
@@ -13,9 +13,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await waitFor(async () => {
-      await result.current.setTemplate('new template', true);
-    });
+    await result.current.setTemplate('new template', true);
 
     const getResult = await result.current.get();
     expect(getResult).toStrictEqual({
@@ -36,10 +34,8 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await waitFor(async () => {
-      await result.current.set('current value');
-      await result.current.setTemplate('new template', false);
-    });
+    await result.current.set('current value');
+    await result.current.setTemplate('new template', false);
 
     const getResult = await result.current.get();
     expect(getResult).toStrictEqual({
@@ -60,9 +56,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await waitFor(async () => {
-      await result.current.setTemplate('new template');
-    });
+    await result.current.setTemplate('new template');
 
     const getResult = await result.current.get();
     expect(getResult).toStrictEqual({
@@ -89,9 +83,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
     await act(async () => {});
 
-    await waitFor(async () => {
-      await result.current.setTemplate({ a: 'new', b: 'new' }, true);
-    });
+    await result.current.setTemplate({ a: 'new', b: 'new' }, true);
 
     const getResult = await result.current.get();
     expect(getResult).toStrictEqual({
