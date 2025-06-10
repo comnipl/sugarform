@@ -33,7 +33,7 @@ export function useObject<T extends SugarValueObject>(
     });
 
     sugar.ready(
-      async (stage) => {
+      async (submit) => {
         if (!matchSugars(sugar, sugars.current)) {
           console.error(
             'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
@@ -47,7 +47,7 @@ export function useObject<T extends SugarValueObject>(
         // すべてのsugarのgetterを実行する。
         const values: [string, SugarGetResult<unknown>][] = await Promise.all(
           [...sugars.current.entries()].map(async ([key, value]) => {
-            const result = await value.get(stage);
+            const result = await value.get(submit);
             return [key, result];
           })
         );

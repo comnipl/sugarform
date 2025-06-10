@@ -48,7 +48,7 @@ function App() {
       <button
         type="button"
         onClick={async () => {
-          const result = await sugar.get('submit');
+          const result = await sugar.get(true);
           console.log(result);
         }}
       >

@@ -72,7 +72,7 @@ describeWithStrict('Sugar#useValidation', () => {
     expect(errors.current).toStrictEqual([]);
 
     await act(async () => {
-      await sugar.current.get('submit');
+      await sugar.current.get(true);
     });
     await waitFor(() =>
       expect(errors.current).toStrictEqual([
@@ -138,7 +138,7 @@ describeWithStrict('Sugar#useValidation', () => {
     expect(errB.current).toStrictEqual([]);
 
     await act(async () => {
-      await sugar.current.get('submit');
+      await sugar.current.get(true);
     });
 
     await waitFor(() => expect(errA.current).toStrictEqual([]));
@@ -162,7 +162,7 @@ describeWithStrict('Sugar#useValidation', () => {
 
     await act(async () => {});
 
-    await expect(sugar.current.get('submit')).resolves.toStrictEqual({
+    await expect(sugar.current.get(true)).resolves.toStrictEqual({
       result: 'validation_fault',
     });
   });

@@ -94,18 +94,21 @@ export class SugarInner<T extends SugarValue> {
     return results.every((r) => r);
   }
 
-  async getInternal(stage: ValidationStage = 'input'): Promise<SugarGetResult<T>> {
+  async getInternal(
+    stage: ValidationStage = 'input'
+  ): Promise<SugarGetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
         return { result: 'unavailable' };
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status.getter(stage);
+        return this.status.getter(stage === 'submit');
     }
   }
 
-  async get(stage: ValidationStage = 'input'): Promise<SugarGetResult<T>> {
+  async get(submit = false): Promise<SugarGetResult<T>> {
+    const stage: ValidationStage = submit ? 'submit' : 'input';
     const result = await this.getInternal(stage);
     if (result.result !== 'success') {
       return result;
@@ -167,7 +170,7 @@ export class SugarInner<T extends SugarValue> {
       status.resolveSetPromise(
         await setter(status.recentValue ?? this.template)
       );
-      status.resolveGetPromise(await getter('input'));
+      status.resolveGetPromise(await getter(false));
     }
 
     this.status = {
