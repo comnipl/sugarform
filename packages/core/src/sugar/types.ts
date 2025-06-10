@@ -27,6 +27,10 @@ export type SugarGetter<T extends SugarValue> = (
 export type SugarSetter<T extends SugarValue> = (
   value: T
 ) => Promise<SugarSetResult<T>>;
+export type SugarTemplateSetter<T extends SugarValue> = (
+  value: T,
+  executeSet?: boolean
+) => Promise<SugarSetResult<T>>;
 
 import type { SugarUseObject } from './useObject';
 import type { SugarUseValidation } from './useValidation';
@@ -34,21 +38,26 @@ import type { SugarUseValidation } from './useValidation';
 type SugarType<T extends SugarValue> = {
   get: SugarGetter<T>;
   set: SugarSetter<T>;
-  ready: (getter: SugarGetter<T>, setter: SugarSetter<T>) => Promise<void>;
+  setTemplate: (value: T, executeSet?: boolean) => Promise<SugarSetResult<T>>;
+  ready: (
+    getter: SugarGetter<T>,
+    setter: SugarSetter<T>,
+    templateSetter?: SugarTemplateSetter<T>
+  ) => Promise<void>;
   destroy: () => void;
   useObject: SugarUseObject<T>;
   useValidation: SugarUseValidation<T>;
-  addEventListener: <K extends keyof SugarEvent<T>>(
+  addEventListener: <K extends keyof SugarEvent>(
     type: K,
-    listener: CustomEventListener<SugarEvent<T>[K]>
+    listener: CustomEventListener<SugarEvent[K]>
   ) => void;
-  removeEventListener: <K extends keyof SugarEvent<T>>(
+  removeEventListener: <K extends keyof SugarEvent>(
     type: K,
-    listener: CustomEventListener<SugarEvent<T>[K]>
+    listener: CustomEventListener<SugarEvent[K]>
   ) => void;
-  dispatchEvent: <K extends keyof SugarEvent<T>>(
+  dispatchEvent: <K extends keyof SugarEvent>(
     type: K,
-    detail?: SugarEvent<T>[K]
+    detail?: SugarEvent[K]
   ) => void;
 };
 
@@ -62,7 +71,7 @@ export type Sugar<T extends SugarValue> = {
 
 export type CustomEventListener<T> = (evt: CustomEvent<T>) => void;
 
-export type SugarEvent<_T extends SugarValue> = {
+export type SugarEvent = {
   change: undefined;
   blur: undefined;
   submit: undefined;

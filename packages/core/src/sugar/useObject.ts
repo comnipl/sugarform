@@ -36,7 +36,8 @@ export function useObject<T extends SugarValueObject>(
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
-    sugars.current!.values().forEach((sugar) => {
+
+    [...sugars.current!.values()].forEach((sugar) => {
       //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
@@ -124,6 +125,40 @@ export function useObject<T extends SugarValueObject>(
         return {
           result: 'success',
         };
+      },
+      async (value, executeSet = true) => {
+        if (!matchSugars(sugar, sugars.current)) {
+          console.error(
+            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
+          );
+          sugar.destroy();
+          return { result: 'unavailable' };
+        }
+
+        const results: [string, SugarSetResult<unknown>][] = await Promise.all(
+          [...sugars.current.entries()].map(async ([key, s]) => {
+            if (key in value) {
+              const nestedValue = (value as Record<string, unknown>)[key];
+              const result = await s.setTemplate(nestedValue, executeSet);
+              return [key, result];
+            }
+            return [key, { result: 'success' as const }];
+          })
+        );
+
+        const unavailables = results.filter(
+          ([_, value]) => value.result === 'unavailable'
+        );
+        if (unavailables.length > 0) {
+          console.error(
+            `Setting template for useObject sugar: ${unavailables
+              .map(([key, _]) => key)
+              .join(', ')} is unavailable.`
+          );
+          return { result: 'unavailable' };
+        }
+
+        return { result: 'success' };
       }
     );
 
@@ -131,7 +166,7 @@ export function useObject<T extends SugarValueObject>(
     return () => {
       sugar.destroy();
       if (sugars.current) {
-        sugars.current.values().forEach((sugar) => {
+        [...sugars.current.values()].forEach((sugar) => {
           sugar.removeEventListener('change', dispatchChange);
           sugar.removeEventListener('blur', dispatchBlur);
         });
