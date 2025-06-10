@@ -77,8 +77,10 @@ describeWithStrict('Sugar#useValidation', () => {
 
     await act(async () => {});
 
-    await expect(sugar.current.get(true)).resolves.toStrictEqual({
-      result: 'validation_fault',
+    await act(async () => {
+      await expect(sugar.current.get(true)).resolves.toStrictEqual({
+        result: 'validation_fault',
+      });
     });
   });
 });
