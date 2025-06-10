@@ -6,6 +6,7 @@ import {
   SugarGetter,
   SugarSetResult,
   SugarSetter,
+  SugarTemplateSetter,
   SugarValue,
   SugarValueObject,
 } from './types';
@@ -36,8 +37,18 @@ export class SugarInner<T extends SugarValue> {
         // `setPromise`を解決する関数。readyすると直ちに呼び出される。
         resolveSetPromise: (value: SugarSetResult<T>) => void;
 
+        // unreadyな状態でsetTemplateが呼びだされた場合に返却されるPromise。
+        setTemplatePromise: ReturnType<SugarTemplateSetter<T>>;
+
+        // `setTemplatePromise`を解決する関数。readyすると直ちに呼び出される。
+        resolveSetTemplatePromise: (value: SugarSetResult<T>) => void;
+
         // unreadyな状態で呼び出された最新のsetの値。
         recentValue: T | null;
+
+        // unreadyな状態で呼び出された最新のsetTemplateの値とexecuteSetフラグ。
+        recentTemplateValue: T | null;
+        recentTemplateExecuteSet: boolean;
 
         // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
         lock: boolean;
@@ -46,6 +57,7 @@ export class SugarInner<T extends SugarValue> {
         status: 'ready';
         getter: SugarGetter<T>;
         setter: SugarSetter<T>;
+        templateSetter?: SugarTemplateSetter<T>;
       }
     | {
         status: 'unavailable';
@@ -61,6 +73,8 @@ export class SugarInner<T extends SugarValue> {
       Promise.withResolvers<SugarGetResult<T>>();
     const { promise: setPromise, resolve: resolveSetPromise } =
       Promise.withResolvers<SugarSetResult<T>>();
+    const { promise: setTemplatePromise, resolve: resolveSetTemplatePromise } =
+      Promise.withResolvers<SugarSetResult<T>>();
 
     this.status = {
       status: 'unready',
@@ -68,7 +82,11 @@ export class SugarInner<T extends SugarValue> {
       resolveGetPromise,
       setPromise,
       resolveSetPromise,
+      setTemplatePromise,
+      resolveSetTemplatePromise,
       recentValue: null,
+      recentTemplateValue: null,
+      recentTemplateExecuteSet: true,
       lock: false,
     };
 
@@ -138,41 +156,59 @@ export class SugarInner<T extends SugarValue> {
 
   setTemplate(value: T, executeSet = true): Promise<SugarSetResult<T>> {
     this.template = value;
-    this.dispatchEvent('templateChange', value);
 
-    if (executeSet) {
-      return this.set(value);
-    } else {
-      return Promise.resolve({
-        result: 'success',
-      });
+    switch (this.status.status) {
+      case 'unavailable':
+        return Promise.resolve({
+          result: 'unavailable',
+        });
+      case 'unready':
+        this.status.recentTemplateValue = value;
+        this.status.recentTemplateExecuteSet = executeSet;
+        return this.status.setTemplatePromise;
+      case 'ready':
+        if (this.status.templateSetter) {
+          return this.status.templateSetter(value, executeSet);
+        } else {
+          if (executeSet) {
+            return this.set(value);
+          } else {
+            return Promise.resolve({
+              result: 'success',
+            });
+          }
+        }
     }
   }
 
   private eventTarget: EventTarget = new EventTarget();
 
-  addEventListener<K extends keyof SugarEvent<T>>(
+  addEventListener<K extends keyof SugarEvent>(
     type: K,
-    listener: CustomEventListener<SugarEvent<T>[K]>
+    listener: CustomEventListener<SugarEvent[K]>
   ) {
     this.eventTarget.addEventListener(type, listener as EventListener);
   }
 
-  removeEventListener<K extends keyof SugarEvent<T>>(
+  removeEventListener<K extends keyof SugarEvent>(
     type: K,
-    listener: CustomEventListener<SugarEvent<T>[K]>
+    listener: CustomEventListener<SugarEvent[K]>
   ) {
     this.eventTarget.removeEventListener(type, listener as EventListener);
   }
 
-  dispatchEvent<K extends keyof SugarEvent<T>>(
+  dispatchEvent<K extends keyof SugarEvent>(
     type: K,
-    detail?: SugarEvent<T>[K]
+    detail?: SugarEvent[K]
   ) {
     this.eventTarget.dispatchEvent(new CustomEvent(type, { detail }));
   }
 
-  async ready(getter: SugarGetter<T>, setter: SugarSetter<T>) {
+  async ready(
+    getter: SugarGetter<T>,
+    setter: SugarSetter<T>,
+    templateSetter?: SugarTemplateSetter<T>
+  ) {
     if (this.status.status === 'unready') {
       // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
       if (this.status.lock) {
@@ -185,12 +221,27 @@ export class SugarInner<T extends SugarValue> {
         await setter(status.recentValue ?? this.template)
       );
       status.resolveGetPromise(await getter(false));
+
+      if (status.recentTemplateValue !== null) {
+        const templateResult = templateSetter
+          ? await templateSetter(
+              status.recentTemplateValue,
+              status.recentTemplateExecuteSet
+            )
+          : status.recentTemplateExecuteSet
+            ? await setter(status.recentTemplateValue)
+            : { result: 'success' as const };
+        status.resolveSetTemplatePromise(templateResult);
+      } else {
+        status.resolveSetTemplatePromise({ result: 'success' });
+      }
     }
 
     this.status = {
       status: 'ready',
       getter,
       setter,
+      templateSetter,
     };
   }
 
@@ -205,6 +256,7 @@ export class SugarInner<T extends SugarValue> {
         if (!this.status.lock) {
           this.status.resolveGetPromise({ result: 'unavailable' });
           this.status.resolveSetPromise({ result: 'unavailable' });
+          this.status.resolveSetTemplatePromise({ result: 'unavailable' });
         }
         this.status = {
           status: 'unavailable',

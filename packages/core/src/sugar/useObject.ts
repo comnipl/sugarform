@@ -36,25 +36,12 @@ export function useObject<T extends SugarValueObject>(
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
-    const handleTemplateChange = (evt: CustomEvent<T>) => {
-      const newTemplate = evt.detail;
-      if (typeof newTemplate === 'object' && newTemplate !== null) {
-        for (const [key, nestedSugar] of sugars.current!.entries()) {
-          if (key in newTemplate) {
-            const nestedValue = (newTemplate as Record<string, unknown>)[key];
-            (nestedSugar as SugarInner<unknown>).template = nestedValue;
-          }
-        }
-      }
-    };
 
     [...sugars.current!.values()].forEach((sugar) => {
       //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });
-
-    sugar.addEventListener('templateChange', handleTemplateChange);
 
     sugar.ready(
       async (submit) => {
@@ -138,6 +125,40 @@ export function useObject<T extends SugarValueObject>(
         return {
           result: 'success',
         };
+      },
+      async (value, executeSet = true) => {
+        if (!matchSugars(sugar, sugars.current)) {
+          console.error(
+            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
+          );
+          sugar.destroy();
+          return { result: 'unavailable' };
+        }
+
+        const results: [string, SugarSetResult<unknown>][] = await Promise.all(
+          [...sugars.current.entries()].map(async ([key, s]) => {
+            if (key in value) {
+              const nestedValue = (value as Record<string, unknown>)[key];
+              const result = await s.setTemplate(nestedValue, executeSet);
+              return [key, result];
+            }
+            return [key, { result: 'success' as const }];
+          })
+        );
+
+        const unavailables = results.filter(
+          ([_, value]) => value.result === 'unavailable'
+        );
+        if (unavailables.length > 0) {
+          console.error(
+            `Setting template for useObject sugar: ${unavailables
+              .map(([key, _]) => key)
+              .join(', ')} is unavailable.`
+          );
+          return { result: 'unavailable' };
+        }
+
+        return { result: 'success' };
       }
     );
 
@@ -150,7 +171,6 @@ export function useObject<T extends SugarValueObject>(
           sugar.removeEventListener('blur', dispatchBlur);
         });
       }
-      sugar.removeEventListener('templateChange', handleTemplateChange);
     };
   }, [sugar]);
 
