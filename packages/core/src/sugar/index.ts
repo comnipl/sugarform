@@ -136,6 +136,17 @@ export class SugarInner<T extends SugarValue> {
     }
   }
 
+  setTemplate(value: T, executeSet = true): Promise<SugarSetResult<T>> {
+    this.template = value;
+    if (executeSet) {
+      return this.set(value);
+    } else {
+      return Promise.resolve({
+        result: 'success',
+      });
+    }
+  }
+
   private eventTarget: EventTarget = new EventTarget();
 
   addEventListener<K extends keyof SugarEvent<T>>(

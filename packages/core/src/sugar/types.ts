@@ -34,6 +34,7 @@ import type { SugarUseValidation } from './useValidation';
 type SugarType<T extends SugarValue> = {
   get: SugarGetter<T>;
   set: SugarSetter<T>;
+  setTemplate: (value: T, executeSet?: boolean) => Promise<SugarSetResult<T>>;
   ready: (getter: SugarGetter<T>, setter: SugarSetter<T>) => Promise<void>;
   destroy: () => void;
   useObject: SugarUseObject<T>;
