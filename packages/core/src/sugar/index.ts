@@ -6,15 +6,16 @@ import {
   SugarGetter,
   SugarSetResult,
   SugarSetter,
-  SugarUseObject,
-  SugarUseValidation,
-  FailFn,
-  ValidationStage,
   SugarValue,
   SugarValueObject,
 } from './types';
-import { useObject } from './useObject';
-import { useValidation } from './useValidation';
+import { useObject, SugarUseObject } from './useObject';
+import {
+  useValidation,
+  SugarUseValidation,
+  ValidationStage,
+  FailFn,
+} from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。

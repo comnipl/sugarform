@@ -3,10 +3,20 @@ import {
   Sugar,
   SugarGetResult,
   SugarSetResult,
-  SugarUseObjectResult,
+  SugarValue,
   SugarValueObject,
 } from './types';
 import { SugarInner } from '.';
+
+export type SugarUseObjectResult<T extends SugarValueObject> = {
+  fields: {
+    [K in keyof T]: Sugar<T[K]>;
+  };
+};
+
+export type SugarUseObject<T extends SugarValue> = T extends SugarValueObject
+  ? () => SugarUseObjectResult<T>
+  : never;
 
 export function useObject<T extends SugarValueObject>(
   sugar: Sugar<T>

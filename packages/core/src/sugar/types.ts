@@ -21,11 +21,6 @@ export type SugarSetResult<_T extends SugarValue> =
       result: 'unavailable';
     };
 
-import type { DependencyList } from 'react';
-
-export type ValidationStage = 'input' | 'blur' | 'submit';
-export type FailFn<V> = (value: V, stage?: ValidationStage) => void;
-
 export type SugarGetter<T extends SugarValue> = (
   submit?: boolean
 ) => Promise<SugarGetResult<T>>;
@@ -33,20 +28,8 @@ export type SugarSetter<T extends SugarValue> = (
   value: T
 ) => Promise<SugarSetResult<T>>;
 
-export type SugarUseObjectResult<T extends SugarValueObject> = {
-  fields: {
-    [K in keyof T]: Sugar<T[K]>;
-  };
-};
-
-export type SugarUseObject<T extends SugarValue> = T extends SugarValueObject
-  ? () => SugarUseObjectResult<T>
-  : never;
-
-export type SugarUseValidation<T extends SugarValue> = <V>(
-  validator: (value: T, fail: FailFn<V>) => void | Promise<void>,
-  deps?: DependencyList
-) => V[];
+import type { SugarUseObject } from './useObject';
+import type { SugarUseValidation } from './useValidation';
 
 type SugarType<T extends SugarValue> = {
   get: SugarGetter<T>;
