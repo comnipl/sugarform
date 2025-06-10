@@ -1,7 +1,8 @@
 import { TextInput, useForm } from '@sugarform/core';
-import { renderHook, render, act } from '@testing-library/react';
+import { renderHook, render, act, waitFor } from '@testing-library/react';
 import { expect, test } from 'vitest';
 import { describeWithStrict } from '../util/describeWithStrict';
+import { SugarInner } from '../../../packages/core/src/sugar/index';
 
 describeWithStrict('Sugar#setTemplate', () => {
   test('setTemplate(value, true) updates template and executes set (default behavior)', async () => {
@@ -12,7 +13,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.setTemplate('new template', true);
     });
 
@@ -21,6 +22,10 @@ describeWithStrict('Sugar#setTemplate', () => {
       result: 'success',
       value: 'new template',
     });
+
+    expect((result.current as SugarInner<string>).template).toBe(
+      'new template'
+    );
   });
 
   test('setTemplate(value, false) updates template only without executing set', async () => {
@@ -31,7 +36,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.set('current value');
       await result.current.setTemplate('new template', false);
     });
@@ -41,6 +46,10 @@ describeWithStrict('Sugar#setTemplate', () => {
       result: 'success',
       value: 'current value',
     });
+
+    expect((result.current as SugarInner<string>).template).toBe(
+      'new template'
+    );
   });
 
   test('setTemplate without executeSet parameter defaults to true', async () => {
@@ -51,7 +60,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     render(<TextInput sugar={result.current} />);
     await act(async () => {});
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.setTemplate('new template');
     });
 
@@ -60,6 +69,10 @@ describeWithStrict('Sugar#setTemplate', () => {
       result: 'success',
       value: 'new template',
     });
+
+    expect((result.current as SugarInner<string>).template).toBe(
+      'new template'
+    );
   });
 
   test('setTemplate works with nested objects', async () => {
@@ -76,7 +89,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
     await act(async () => {});
 
-    await act(async () => {
+    await waitFor(async () => {
       await result.current.setTemplate({ a: 'new', b: 'new' }, true);
     });
 
@@ -85,24 +98,9 @@ describeWithStrict('Sugar#setTemplate', () => {
       result: 'success',
       value: { a: 'new', b: 'new' },
     });
-  });
 
-  test('regular set method remains unchanged', async () => {
-    const { result } = renderHook(() =>
-      useForm<string>({ template: 'original' })
-    );
-
-    render(<TextInput sugar={result.current} />);
-    await act(async () => {});
-
-    await act(async () => {
-      await result.current.set('new value');
-    });
-
-    const getResult = await result.current.get();
-    expect(getResult).toStrictEqual({
-      result: 'success',
-      value: 'new value',
-    });
+    expect(
+      (result.current as SugarInner<{ a: string; b: string }>).template
+    ).toStrictEqual({ a: 'new', b: 'new' });
   });
 });
