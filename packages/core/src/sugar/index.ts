@@ -39,6 +39,8 @@ export class SugarInner<T extends SugarValue> {
         // unreadyな状態で呼び出された最新のsetの値。
         recentValue: T | null;
 
+        shouldDispatchChange: boolean;
+
         // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
         lock: boolean;
       }
@@ -52,6 +54,7 @@ export class SugarInner<T extends SugarValue> {
       };
 
   template: T;
+  isUseObjectParent = false;
   private validators: Set<
     (stage: ValidationStage, value: T) => Promise<boolean>
   > = new Set();
@@ -69,6 +72,7 @@ export class SugarInner<T extends SugarValue> {
       setPromise,
       resolveSetPromise,
       recentValue: null,
+      shouldDispatchChange: false,
       lock: false,
     };
 
@@ -130,9 +134,15 @@ export class SugarInner<T extends SugarValue> {
         });
       case 'unready':
         this.status.recentValue = value;
+        this.status.shouldDispatchChange = true;
         return this.status.setPromise;
       case 'ready':
-        return this.status.setter(value);
+        return this.status.setter(value).then((result) => {
+          if (result.result === 'success' && !this.isUseObjectParent) {
+            this.dispatchEvent('change');
+          }
+          return result;
+        });
     }
   }
 
@@ -168,9 +178,16 @@ export class SugarInner<T extends SugarValue> {
       const status = this.status;
       status.lock = true;
 
-      status.resolveSetPromise(
-        await setter(status.recentValue ?? this.template)
-      );
+      const setResult = await setter(status.recentValue ?? this.template);
+      status.resolveSetPromise(setResult);
+      if (
+        setResult.result === 'success' &&
+        status.shouldDispatchChange &&
+        status.recentValue !== null &&
+        status.recentValue !== this.template
+      ) {
+        this.dispatchEvent('change');
+      }
       status.resolveGetPromise(await getter(false));
     }
 

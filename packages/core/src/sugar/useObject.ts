@@ -33,10 +33,19 @@ export function useObject<T extends SugarValueObject>(
   }
 
   useEffect(() => {
-    // イベントを接続
-    const dispatchChange = () => sugar.dispatchEvent('change');
+    (sugar as SugarInner<T>).isUseObjectParent = true;
+
+    let hasPendingChange = false;
+    const dispatchChange = () => {
+      if (hasPendingChange) return;
+      hasPendingChange = true;
+      Promise.resolve().then(() => {
+        sugar.dispatchEvent('change');
+        hasPendingChange = false;
+      });
+    };
     const dispatchBlur = () => sugar.dispatchEvent('blur');
-    sugars.current!.values().forEach((sugar) => {
+    Array.from(sugars.current!.values()).forEach((sugar) => {
       //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
@@ -131,7 +140,7 @@ export function useObject<T extends SugarValueObject>(
     return () => {
       sugar.destroy();
       if (sugars.current) {
-        sugars.current.values().forEach((sugar) => {
+        Array.from(sugars.current.values()).forEach((sugar) => {
           sugar.removeEventListener('change', dispatchChange);
           sugar.removeEventListener('blur', dispatchBlur);
         });
