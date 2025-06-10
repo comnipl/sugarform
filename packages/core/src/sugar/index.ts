@@ -18,6 +18,8 @@ import {
 } from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
+  nestedSugars?: Map<string, Sugar<unknown>>;
+
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
   // そのあいだに、get/setが呼びだされた場合、状態がReadyになるまで待機して実行します。
   private status:
@@ -138,6 +140,16 @@ export class SugarInner<T extends SugarValue> {
 
   setTemplate(value: T, executeSet = true): Promise<SugarSetResult<T>> {
     this.template = value;
+
+    if (this.nestedSugars && typeof value === 'object' && value !== null) {
+      for (const [key, nestedSugar] of this.nestedSugars.entries()) {
+        if (key in value) {
+          const nestedValue = (value as Record<string, unknown>)[key];
+          (nestedSugar as SugarInner<unknown>).template = nestedValue;
+        }
+      }
+    }
+
     if (executeSet) {
       return this.set(value);
     } else {

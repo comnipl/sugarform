@@ -94,5 +94,8 @@ describeWithStrict('Sugar#setTemplate', () => {
     expect(
       (result.current as SugarInner<{ a: string; b: string }>).template
     ).toStrictEqual({ a: 'new', b: 'new' });
+
+    expect((obj.current.fields.a as SugarInner<string>).template).toBe('new');
+    expect((obj.current.fields.b as SugarInner<string>).template).toBe('new');
   });
 });
