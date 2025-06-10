@@ -10,6 +10,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
 
     render(<TextInput sugar={result.current} />);
+    await act(async () => {});
 
     await act(async () => {
       await result.current.setTemplate('new template', true);
@@ -28,6 +29,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
 
     render(<TextInput sugar={result.current} />);
+    await act(async () => {});
 
     await act(async () => {
       await result.current.set('current value');
@@ -47,6 +49,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
 
     render(<TextInput sugar={result.current} />);
+    await act(async () => {});
 
     await act(async () => {
       await result.current.setTemplate('new template');
@@ -71,6 +74,7 @@ describeWithStrict('Sugar#setTemplate', () => {
         <TextInput sugar={obj.current.fields.b} />
       </>
     );
+    await act(async () => {});
 
     await act(async () => {
       await result.current.setTemplate({ a: 'new', b: 'new' }, true);
@@ -89,6 +93,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
 
     render(<TextInput sugar={result.current} />);
+    await act(async () => {});
 
     await act(async () => {
       await result.current.set('new value');
