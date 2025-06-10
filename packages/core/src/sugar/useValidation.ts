@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { DependencyList } from 'react';
 import { SugarInner } from '.';
-import { Sugar, SugarValue, ValidationStage, FailFn } from './types';
+import { Sugar, SugarValue } from './types';
+
+export type ValidationStage = 'input' | 'blur' | 'submit';
+export type FailFn<V> = (value: V, stage?: ValidationStage) => void;
+
+export type SugarUseValidation<T extends SugarValue> = <V>(
+  validator: (value: T, fail: FailFn<V>) => void | Promise<void>,
+  deps?: DependencyList
+) => V[];
 
 export function useValidation<T extends SugarValue, V>(
   sugar: Sugar<T>,
