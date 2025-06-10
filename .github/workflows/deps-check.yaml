@@ -3,20 +3,16 @@ name: deps-check
 on:
   push:
     branches: [main]
-  pull_request_target:
+  pull_request:
 
-permissions: read-all
+permissions:
+  contents: read
 
 jobs:
   manypkg:
     runs-on: ubuntu-latest
     steps:
-      - if: ${{ github.event_name != 'pull_request_target' }}
-        uses: actions/checkout@v3
-      - if: ${{ github.event_name == 'pull_request_target' }}
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/checkout@v3
       - name: Setup Node.js
         uses: ./.github/actions/setup-node
       - name: Run manypkg
