@@ -25,7 +25,8 @@ export type SugarGetter<T extends SugarValue> = (
   submit?: boolean
 ) => Promise<SugarGetResult<T>>;
 export type SugarSetter<T extends SugarValue> = (
-  value: T
+  value: T,
+  internal?: boolean
 ) => Promise<SugarSetResult<T>>;
 
 import type { SugarUseObject } from './useObject';

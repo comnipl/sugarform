@@ -28,7 +28,9 @@ export function useObject<T extends SugarValueObject>(
     sugars.current = new Map();
     const template = (sugar as SugarInner<T>).template;
     for (const key in template) {
-      sugars.current.set(key, new SugarInner(template[key]) as Sugar<unknown>);
+      const fieldSugar = new SugarInner(template[key]) as Sugar<unknown>;
+      (fieldSugar as SugarInner<unknown>).markAsNestedField();
+      sugars.current.set(key, fieldSugar);
     }
   }
 
@@ -112,7 +114,7 @@ export function useObject<T extends SugarValueObject>(
         // すべてのsugarのsetterを実行する。
         const results: [string, SugarSetResult<unknown>][] = await Promise.all(
           [...sugars.current.entries()].map(async ([key, s]) => {
-            const result = await s.set(value[key]);
+            const result = await s.set(value[key], true);
             return [key, result];
           })
         );

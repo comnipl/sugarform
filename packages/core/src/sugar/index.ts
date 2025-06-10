@@ -20,6 +20,8 @@ import {
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
   // そのあいだに、get/setが呼びだされた場合、状態がReadyになるまで待機して実行します。
+  private isNestedField = false;
+  private wasSetCalled = false;
   private status:
     | {
         status: 'unready';
@@ -39,7 +41,7 @@ export class SugarInner<T extends SugarValue> {
         // unreadyな状態で呼び出された最新のsetの値。
         recentValue: T | null;
 
-        shouldDispatchChange: boolean;
+
 
         // ready() の処理はasyncで実行されるため、ready()の処理中にstatusに触らないようにする。
         lock: boolean;
@@ -54,7 +56,7 @@ export class SugarInner<T extends SugarValue> {
       };
 
   template: T;
-  isUseObjectParent = false;
+
   private validators: Set<
     (stage: ValidationStage, value: T) => Promise<boolean>
   > = new Set();
@@ -72,7 +74,7 @@ export class SugarInner<T extends SugarValue> {
       setPromise,
       resolveSetPromise,
       recentValue: null,
-      shouldDispatchChange: false,
+
       lock: false,
     };
 
@@ -126,7 +128,7 @@ export class SugarInner<T extends SugarValue> {
     return result;
   }
 
-  set(value: T): Promise<SugarSetResult<T>> {
+  set(value: T, internal = false): Promise<SugarSetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
         return Promise.resolve({
@@ -134,11 +136,11 @@ export class SugarInner<T extends SugarValue> {
         });
       case 'unready':
         this.status.recentValue = value;
-        this.status.shouldDispatchChange = true;
+        this.wasSetCalled = !internal;
         return this.status.setPromise;
       case 'ready':
         return this.status.setter(value).then((result) => {
-          if (result.result === 'success' && !this.isUseObjectParent) {
+          if (result.result === 'success' && !internal) {
             this.dispatchEvent('change');
           }
           return result;
@@ -182,9 +184,8 @@ export class SugarInner<T extends SugarValue> {
       status.resolveSetPromise(setResult);
       if (
         setResult.result === 'success' &&
-        status.shouldDispatchChange &&
         status.recentValue !== null &&
-        status.recentValue !== this.template
+        this.wasSetCalled
       ) {
         this.dispatchEvent('change');
       }
@@ -217,6 +218,10 @@ export class SugarInner<T extends SugarValue> {
       case 'unavailable':
         break;
     }
+  }
+
+  markAsNestedField() {
+    this.isNestedField = true;
   }
 
   useObject: SugarUseObject<T> = (() =>
