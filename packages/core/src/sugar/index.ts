@@ -7,10 +7,14 @@ import {
   SugarSetResult,
   SugarSetter,
   SugarUseObject,
+  SugarUseValidation,
+  FailFn,
+  ValidationStage,
   SugarValue,
   SugarValueObject,
 } from './types';
 import { useObject } from './useObject';
+import { useValidation } from './useValidation';
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -47,6 +51,9 @@ export class SugarInner<T extends SugarValue> {
       };
 
   template: T;
+  private validators: Set<
+    (stage: ValidationStage, value: T) => Promise<boolean>
+  > = new Set();
 
   constructor(template: T) {
     const { promise: getPromise, resolve: resolveGetPromise } =
@@ -67,17 +74,51 @@ export class SugarInner<T extends SugarValue> {
     this.template = template;
   }
 
-  get(): Promise<SugarGetResult<T>> {
+  registerValidator(
+    fn: (stage: ValidationStage, value: T) => Promise<boolean>
+  ) {
+    this.validators.add(fn);
+  }
+
+  unregisterValidator(
+    fn: (stage: ValidationStage, value: T) => Promise<boolean>
+  ) {
+    this.validators.delete(fn);
+  }
+
+  private async runValidators(stage: ValidationStage, value: T) {
+    if (this.validators.size === 0) return true;
+    const results = await Promise.all(
+      [...this.validators].map((v) => v(stage, value))
+    );
+    return results.every((r) => r);
+  }
+
+  async getInternal(
+    stage: ValidationStage = 'input'
+  ): Promise<SugarGetResult<T>> {
     switch (this.status.status) {
       case 'unavailable':
-        return Promise.resolve({
-          result: 'unavailable',
-        });
+        return { result: 'unavailable' };
       case 'unready':
         return this.status.getPromise;
       case 'ready':
-        return this.status.getter();
+        return this.status.getter(stage === 'submit');
     }
+  }
+
+  async get(submit = false): Promise<SugarGetResult<T>> {
+    const stage: ValidationStage = submit ? 'submit' : 'input';
+    const result = await this.getInternal(stage);
+    if (result.result !== 'success') {
+      return result;
+    }
+
+    const ok = await this.runValidators(stage, result.value);
+    if (!ok) {
+      return { result: 'validation_fault' };
+    }
+    return result;
   }
 
   set(value: T): Promise<SugarSetResult<T>> {
@@ -129,7 +170,7 @@ export class SugarInner<T extends SugarValue> {
       status.resolveSetPromise(
         await setter(status.recentValue ?? this.template)
       );
-      status.resolveGetPromise(await getter());
+      status.resolveGetPromise(await getter(false));
     }
 
     this.status = {
@@ -162,4 +203,10 @@ export class SugarInner<T extends SugarValue> {
 
   useObject: SugarUseObject<T> = (() =>
     useObject(this as Sugar<SugarValueObject>)) as SugarUseObject<T>;
+
+  useValidation: SugarUseValidation<T> = (<V>(
+    validator: (value: T, fail: FailFn<V>) => void | Promise<void>,
+    deps?: React.DependencyList
+  ) =>
+    useValidation(this as Sugar<T>, validator, deps)) as SugarUseValidation<T>;
 }

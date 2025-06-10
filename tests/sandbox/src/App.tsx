@@ -1,6 +1,19 @@
-import { useEffect, useRef } from 'react';
+import { useCallback } from 'react';
+// Demo showing how validation errors appear in real usage
 import './App.css';
-import { useForm, type Sugar } from '@sugarform/core';
+import { useForm, TextInput, NumberInput, type Sugar } from '@sugarform/core';
+
+type Birthday = {
+  year: number;
+  month: number;
+  day: number;
+};
+
+type Person = {
+  firstName: string;
+  lastName: string;
+  birthday: Birthday;
+};
 
 type FormType = {
   person_a: Person;
@@ -13,10 +26,12 @@ function App() {
       person_a: {
         firstName: '',
         lastName: '',
+        birthday: { year: NaN, month: NaN, day: NaN },
       },
       person_b: {
         firstName: '',
         lastName: '',
+        birthday: { year: NaN, month: NaN, day: NaN },
       },
     },
   });
@@ -33,20 +48,16 @@ function App() {
       <button
         type="button"
         onClick={async () => {
-          const result = await sugar.get();
+          const result = await sugar.get(true);
           console.log(result);
         }}
       >
         get
       </button>
+      <hr />
     </>
   );
 }
-
-type Person = {
-  firstName: string;
-  lastName: string;
-};
 
 function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
   const { fields } = sugar.useObject();
@@ -61,39 +72,61 @@ function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
         Last Name:
         <TextInput sugar={fields.lastName} />
       </label>
+      <BirthdayInput sugar={fields.birthday} />
     </div>
   );
 }
 
-function TextInput({ sugar }: { sugar: Sugar<string> }) {
-  const ref = useRef<HTMLInputElement>(null);
+function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
+  const { fields } = sugar.useObject();
 
-  useEffect(() => {
-    if (ref.current) {
-      sugar.ready(
-        () => {
-          if (!ref.current) {
-            return Promise.resolve({ result: 'unavailable' });
-          }
-          return Promise.resolve({
-            result: 'success',
-            value: ref.current.value,
-          });
-        },
-        (value) => {
-          if (!ref.current) {
-            return Promise.resolve({ result: 'unavailable' });
-          }
-          ref.current.value = value;
-          return Promise.resolve({ result: 'success' });
-        }
-      );
-    }
-  }, [sugar]);
+  const errors = sugar.useValidation<string>(
+    useCallback(async (value, fail) => {
+      const complete =
+        !Number.isNaN(value.year) &&
+        !Number.isNaN(value.month) &&
+        !Number.isNaN(value.day);
+      if (!complete) {
+        const missed: string[] = [];
+        if (Number.isNaN(value.year)) missed.push('year');
+        if (Number.isNaN(value.month)) missed.push('month');
+        if (Number.isNaN(value.day)) missed.push('day');
+        fail(`missing ${missed.join(', ')}`, 'submit');
+        return;
+      }
+
+      const birthday = new Date(value.year, value.month - 1, value.day);
+      const today = new Date();
+      const age = today.getFullYear() - birthday.getFullYear();
+      const passed =
+        today.getMonth() > birthday.getMonth() ||
+        (today.getMonth() === birthday.getMonth() &&
+          today.getDate() >= birthday.getDate());
+      if (age < 20 || (age === 20 && !passed)) {
+        fail('must be at least 20 years old', 'blur');
+      }
+    }, [])
+  );
 
   return (
     <div>
-      <input type="text" ref={ref} />
+      <label>
+        Year:
+        <NumberInput sugar={fields.year} />
+      </label>
+      <label>
+        Month:
+        <NumberInput sugar={fields.month} />
+      </label>
+      <label>
+        Day:
+        <NumberInput sugar={fields.day} />
+      </label>
+      {errors.map((e, i) => (
+        <div key={i} className="error">
+          {e}
+        </div>
+      ))}
     </div>
   );
 }

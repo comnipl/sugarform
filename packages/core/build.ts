@@ -110,6 +110,11 @@ async function pipeline(format: 'esm' | 'cjs') {
       },
       target: 'es2017',
       loose: false,
+      transform: {
+        react: {
+          runtime: 'automatic',
+        },
+      },
     },
   });
 

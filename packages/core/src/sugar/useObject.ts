@@ -26,7 +26,6 @@ export function useObject<T extends SugarValueObject>(
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
-
     sugars.current!.values().forEach((sugar) => {
       //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
       sugar.addEventListener('change', dispatchChange);
@@ -34,7 +33,7 @@ export function useObject<T extends SugarValueObject>(
     });
 
     sugar.ready(
-      async () => {
+      async (submit) => {
         if (!matchSugars(sugar, sugars.current)) {
           console.error(
             'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
@@ -48,7 +47,7 @@ export function useObject<T extends SugarValueObject>(
         // すべてのsugarのgetterを実行する。
         const values: [string, SugarGetResult<unknown>][] = await Promise.all(
           [...sugars.current.entries()].map(async ([key, value]) => {
-            const result = await value.get();
+            const result = await value.get(submit);
             return [key, result];
           })
         );

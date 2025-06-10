@@ -21,3 +21,5 @@ still show the attempt and mention the failure in your PR message.
   immediately before the disabling comment.
 - When escaping the TypeScript type system (e.g. using `!` or `as unknown as`),
   explain why it is safe on the line immediately above the code in question.
+
+- Include `- close #<issue number>` in PR descriptions when a PR closes an issue.
