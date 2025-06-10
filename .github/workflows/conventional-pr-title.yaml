@@ -1,11 +1,12 @@
 name: conventional-pr-title
 
 on:
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - edited
       - synchronize
+  merge_group:
 
 permissions:
   pull-requests: read
