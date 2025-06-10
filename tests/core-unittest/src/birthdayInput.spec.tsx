@@ -53,7 +53,7 @@ const validator = async (
     (today.getMonth() === birthday.getMonth() &&
       today.getDate() >= birthday.getDate());
   if (age < 20 || (age === 20 && !passed)) {
-    fail({ type: 'young' }, 'blur');
+    fail({ type: 'young' }, 'submit');
   }
 };
 
@@ -76,7 +76,7 @@ function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
 }
 
 describeWithStrict('BirthdayInput', () => {
-  test('shows missing fields on submit', async () => {
+  test('shows missing fields on submit and clears after blur', async () => {
     const { result } = renderHook(() =>
       useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
     );
@@ -94,9 +94,34 @@ describeWithStrict('BirthdayInput', () => {
       expect(alerts).toHaveLength(1);
       expect(alerts[0].textContent).toBe('year, month, day missing');
     });
+
+    const user = userEvent.setup();
+    const year = screen.getByPlaceholderText('y');
+    await user.click(year);
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.queryAllByRole('alert')).toHaveLength(0);
+    });
   });
 
-  test('shows age error on blur and clears after correction', async () => {
+  test('do not shows missing fields on blur', async () => {
+    const { result } = renderHook(() =>
+      useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
+    );
+    render(<BirthdayInput sugar={result.current} />);
+    await act(async () => {});
+    const user = userEvent.setup();
+    const year = screen.getByPlaceholderText('y');
+    await user.click(year);
+    await user.tab();
+
+    await waitFor(() => {
+      expect(screen.queryAllByRole('alert')).toHaveLength(0);
+    });
+  });
+
+  test('shows age error on submit and clears after correction', async () => {
     const { result } = renderHook(() =>
       useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
     );
@@ -110,7 +135,10 @@ describeWithStrict('BirthdayInput', () => {
     await user.type(year, '2010');
     await user.type(month, '1');
     await user.type(day, '1');
-    await user.tab();
+
+    await act(async () => {
+      await result.current.get(true);
+    });
 
     await waitFor(() => {
       const alerts = screen.getAllByRole('alert');
@@ -120,7 +148,6 @@ describeWithStrict('BirthdayInput', () => {
 
     await user.clear(year);
     await user.type(year, '2000');
-    await user.tab();
 
     await waitFor(() => {
       expect(screen.queryAllByRole('alert')).toHaveLength(0);
