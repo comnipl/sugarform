@@ -23,3 +23,7 @@ still show the attempt and mention the failure in your PR message.
   explain why it is safe on the line immediately above the code in question.
 
 - Include `- close #<issue number>` in PR descriptions when a PR closes an issue.
+
+- Do not violate constraints required for React libraries.
+- Strive for lightweight and high-performance code, such as by actively using
+  classes when appropriate.
