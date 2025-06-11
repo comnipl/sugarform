@@ -1,0 +1,22 @@
+name: codecov-validation
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+  merge_group:
+
+permissions: read-all
+
+jobs:
+  codecov-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - if: ${{ github.event_name != 'pull_request_target' }}
+        uses: actions/checkout@v3
+      - if: ${{ github.event_name == 'pull_request_target' }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Validate Codecov configuration
+        run: curl -X POST --data-binary @codecov.yml https://codecov.io/validate
