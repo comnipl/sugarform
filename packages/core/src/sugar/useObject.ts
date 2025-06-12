@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import {
   Sugar,
   SugarGetResult,
@@ -22,32 +22,34 @@ export function useObject<T extends SugarValueObject>(
   sugar: Sugar<T>
 ): SugarUseObjectResult<T> {
   const fields = useRef<SugarUseObjectResult<T>['fields']>(undefined);
-  const sugarInitializer = useRef<{
-    dispatchChange: () => void;
-    dispatchBlur: () => void;
-  }[]>([]);
-
+  const sugarInitializer = useRef<
+    {
+      dispatchChange: () => void;
+      dispatchBlur: () => void;
+    }[]
+  >([]);
 
   // sugars内の値を初期化する。 (空のsugarで埋める)
   if (!fields.current) {
-    fields.current = new Proxy({}, {
-      get: (target: Record<string, SugarInner<unknown>>, prop: string, _) => {
-        if (!(prop in target)) {
-          const s = new SugarInner((sugar as SugarInner<T>).template?.[prop]);
-          sugarInitializer.current.forEach((initializer) => {
-            s.addEventListener('change', initializer.dispatchChange);
-            s.addEventListener('blur', initializer.dispatchBlur);
-          });
-          target[prop] = s;
-        }
-        return target[prop];
+    fields.current = new Proxy(
+      {},
+      {
+        get: (target: Record<string, SugarInner<unknown>>, prop: string, _) => {
+          if (!(prop in target)) {
+            const s = new SugarInner((sugar as SugarInner<T>).template?.[prop]);
+            sugarInitializer.current.forEach((initializer) => {
+              s.addEventListener('change', initializer.dispatchChange);
+              s.addEventListener('blur', initializer.dispatchBlur);
+            });
+            target[prop] = s;
+          }
+          return target[prop];
+        },
       }
-    }) as SugarUseObjectResult<T>['fields'];
+    ) as SugarUseObjectResult<T>['fields'];
   }
 
-
   useEffect(() => {
-
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
@@ -62,7 +64,6 @@ export function useObject<T extends SugarValueObject>(
       sugar.addEventListener('blur', dispatchBlur);
     });
     sugarInitializer.current.push(initializer);
-
 
     sugar.ready(
       async (submit) => {
@@ -192,7 +193,7 @@ export function useObject<T extends SugarValueObject>(
           sugar.removeEventListener('blur', dispatchBlur);
         });
         sugarInitializer.current = sugarInitializer.current.filter(
-          (i) =>i !== initializer
+          (i) => i !== initializer
         );
       }
     };

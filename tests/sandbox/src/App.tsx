@@ -33,7 +33,8 @@ function App() {
         lastName: 'Johnson',
         birthday: { year: 2000, month: 1, day: 1 },
       },
-    }  });
+    },
+  });
 
   const { fields } = sugar.useObject();
 

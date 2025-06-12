@@ -216,9 +216,7 @@ export class SugarInner<T extends SugarValue> {
 
       const initial = status.recentValue ?? this.template;
       if (initial !== undefined) {
-        status.resolveSetPromise(
-          await setter(initial)
-        );
+        status.resolveSetPromise(await setter(initial));
       }
       status.resolveGetPromise(await getter(false));
 
