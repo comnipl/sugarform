@@ -80,13 +80,13 @@ describeWithStrict('BirthdayInput', () => {
     const { result } = renderHook(() =>
       useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
     );
-    render(<BirthdayInput sugar={result.current} />);
+    render(<BirthdayInput sugar={result.current.sugar} />);
     await act(async () => {});
 
     expect(screen.queryAllByRole('alert')).toHaveLength(0);
 
     await act(async () => {
-      await result.current.get(true);
+      await result.current.sugar.get(true);
     });
 
     await waitFor(() => {
@@ -109,7 +109,7 @@ describeWithStrict('BirthdayInput', () => {
     const { result } = renderHook(() =>
       useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
     );
-    render(<BirthdayInput sugar={result.current} />);
+    render(<BirthdayInput sugar={result.current.sugar} />);
     await act(async () => {});
     const user = userEvent.setup();
     const year = screen.getByPlaceholderText('y');
@@ -125,7 +125,7 @@ describeWithStrict('BirthdayInput', () => {
     const { result } = renderHook(() =>
       useForm<Birthday>({ template: { year: NaN, month: NaN, day: NaN } })
     );
-    render(<BirthdayInput sugar={result.current} />);
+    render(<BirthdayInput sugar={result.current.sugar} />);
     await act(async () => {});
     const user = userEvent.setup();
     const year = screen.getByPlaceholderText('y');
@@ -137,7 +137,7 @@ describeWithStrict('BirthdayInput', () => {
     await user.type(day, '1');
 
     await act(async () => {
-      await result.current.get(true);
+      await result.current.sugar.get(true);
     });
 
     await waitFor(() => {

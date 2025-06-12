@@ -21,7 +21,7 @@ type FormType = {
 };
 
 function App() {
-  const sugar = useForm<FormType>({
+  const { sugar, collect } = useForm<FormType>({
     template: {
       person_a: {
         firstName: '',
@@ -48,11 +48,11 @@ function App() {
       <button
         type="button"
         onClick={async () => {
-          const result = await sugar.get(true);
+          const result = await collect();
           console.log(result);
         }}
       >
-        get
+        collect
       </button>
       <hr />
     </>

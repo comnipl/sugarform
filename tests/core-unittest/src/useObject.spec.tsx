@@ -9,10 +9,12 @@ describeWithStrict('Sugar#useObject', () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })
     );
-    const { result: object } = renderHook(() => sugar.current.useObject());
+    const { result: object } = renderHook(() =>
+      sugar.current.sugar.useObject()
+    );
 
     const onChange = vi.fn();
-    sugar.current.addEventListener('change', onChange);
+    sugar.current.sugar.addEventListener('change', onChange);
 
     render(<TextInput sugar={object.current.fields.a} placeholder="a" />);
     render(<TextInput sugar={object.current.fields.b} placeholder="b" />);
@@ -28,7 +30,7 @@ describeWithStrict('Sugar#useObject', () => {
     await user.type(inputB, 'testB');
     expect(onChange).toHaveBeenCalledTimes(10);
 
-    await expect(sugar.current.get()).resolves.toStrictEqual({
+    await expect(sugar.current.sugar.get()).resolves.toStrictEqual({
       result: 'success',
       value: { a: 'testA', b: 'testB' },
     });
@@ -38,10 +40,12 @@ describeWithStrict('Sugar#useObject', () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })
     );
-    const { result: object } = renderHook(() => sugar.current.useObject());
+    const { result: object } = renderHook(() =>
+      sugar.current.sugar.useObject()
+    );
 
     const onBlur = vi.fn();
-    sugar.current.addEventListener('blur', onBlur);
+    sugar.current.sugar.addEventListener('blur', onBlur);
 
     render(<TextInput sugar={object.current.fields.a} placeholder="a" />);
     render(<TextInput sugar={object.current.fields.b} placeholder="b" />);
@@ -63,7 +67,7 @@ describeWithStrict('Sugar#useObject', () => {
     await user.tab();
     expect(onBlur).toHaveBeenCalledTimes(2);
 
-    await expect(sugar.current.get()).resolves.toStrictEqual({
+    await expect(sugar.current.sugar.get()).resolves.toStrictEqual({
       result: 'success',
       value: { a: 'testA', b: 'testB' },
     });
