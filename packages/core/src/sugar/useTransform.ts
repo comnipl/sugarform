@@ -18,13 +18,11 @@ export function useTransform<T extends SugarValue, U extends SugarValue>(
   const transformedSugar = useRef<Sugar<U>>(undefined);
 
   if (!transformedSugar.current) {
-    transformedSugar.current = new SugarInner<U>('' as unknown as U);
+    const originalTemplate = (sugar as SugarInner<T>).template;
+    transformedSugar.current = new SugarInner<U>(originalTemplate as unknown as U);
   }
 
   useEffect(() => {
-    const dispatchChange = () =>
-      transformedSugar.current!.dispatchEvent('change');
-    const dispatchBlur = () => transformedSugar.current!.dispatchEvent('blur');
 
     transformedSugar.current!.addEventListener('change', () =>
       sugar.dispatchEvent('change')
@@ -32,9 +30,6 @@ export function useTransform<T extends SugarValue, U extends SugarValue>(
     transformedSugar.current!.addEventListener('blur', () =>
       sugar.dispatchEvent('blur')
     );
-
-    sugar.addEventListener('change', dispatchChange);
-    sugar.addEventListener('blur', dispatchBlur);
 
     sugar.ready(
       async (submit) => {
@@ -62,8 +57,6 @@ export function useTransform<T extends SugarValue, U extends SugarValue>(
     );
 
     return () => {
-      sugar.removeEventListener('change', dispatchChange);
-      sugar.removeEventListener('blur', dispatchBlur);
       transformedSugar.current!.destroy();
     };
   }, [sugar, config]);
