@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import {
   Sugar,
   SugarGetResult,
@@ -21,43 +21,64 @@ export type SugarUseObject<T extends SugarValue> = T extends SugarValueObject
 export function useObject<T extends SugarValueObject>(
   sugar: Sugar<T>
 ): SugarUseObjectResult<T> {
-  const sugars = useRef<Map<string, Sugar<unknown>>>(undefined);
+  const fields = useRef<SugarUseObjectResult<T>['fields']>(undefined);
+  const sugarInitializer = useRef<{
+    dispatchChange: () => void;
+    dispatchBlur: () => void;
+  }[]>([]);
+
 
   // sugars内の値を初期化する。 (空のsugarで埋める)
-  if (!sugars.current) {
-    sugars.current = new Map();
-    const template = (sugar as SugarInner<T>).template;
-    for (const key in template) {
-      sugars.current.set(key, new SugarInner(template[key]) as Sugar<unknown>);
-    }
+  if (!fields.current) {
+    fields.current = new Proxy({}, {
+      get: (target: Record<string, SugarInner<unknown>>, prop: string, _) => {
+        if (!(prop in target)) {
+          const s = new SugarInner((sugar as SugarInner<T>).template[prop]);
+          sugarInitializer.current.forEach((initializer) => {
+            s.addEventListener('change', initializer.dispatchChange);
+            s.addEventListener('blur', initializer.dispatchBlur);
+          });
+          target[prop] = s;
+        }
+        return target[prop];
+      }
+    }) as SugarUseObjectResult<T>['fields'];
   }
 
+
   useEffect(() => {
+
     // イベントを接続
     const dispatchChange = () => sugar.dispatchEvent('change');
     const dispatchBlur = () => sugar.dispatchEvent('blur');
 
-    [...sugars.current!.values()].forEach((sugar) => {
-      //     ^^^^^^^^ 上でsugarsを初期化しているので、sugars.currentはundefinedではない
+    const initializer = {
+      dispatchChange,
+      dispatchBlur,
+    };
+
+    Object.values(fields.current!).forEach((sugar) => {
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });
+    sugarInitializer.current.push(initializer);
+
 
     sugar.ready(
       async (submit) => {
-        if (!matchSugars(sugar, sugars.current)) {
-          console.error(
-            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
-          );
-          sugar.destroy();
-          return { result: 'unavailable' };
-        }
+        // if (!matchSugars(sugar, fields.current)) {
+        //   console.error(
+        //     'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
+        //   );
+        //   sugar.destroy();
+        //   return { result: 'unavailable' };
+        // }
 
         // TODO: 一定期間でタイムアウトして、コンポーネントがないと警告を出すと開発者体験がより良い。
 
         // すべてのsugarのgetterを実行する。
         const values: [string, SugarGetResult<unknown>][] = await Promise.all(
-          [...sugars.current.entries()].map(async ([key, value]) => {
+          Object.entries(fields.current!).map(async ([key, value]) => {
             const result = await value.get(submit);
             return [key, result];
           })
@@ -93,17 +114,17 @@ export function useObject<T extends SugarValueObject>(
         };
       },
       async (value) => {
-        if (!matchSugars(sugar, sugars.current)) {
-          console.error(
-            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
-          );
-          sugar.destroy();
-          return { result: 'unavailable' };
-        }
+        // if (!matchSugars(sugar, fields.current)) {
+        //   console.error(
+        //     'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
+        //   );
+        //   sugar.destroy();
+        //   return { result: 'unavailable' };
+        // }
 
         // すべてのsugarのsetterを実行する。
         const results: [string, SugarSetResult<unknown>][] = await Promise.all(
-          [...sugars.current.entries()].map(async ([key, s]) => {
+          Object.entries(fields.current!).map(async ([key, s]) => {
             const result = await s.set(value[key]);
             return [key, result];
           })
@@ -127,16 +148,16 @@ export function useObject<T extends SugarValueObject>(
         };
       },
       async (value, executeSet = true) => {
-        if (!matchSugars(sugar, sugars.current)) {
-          console.error(
-            'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
-          );
-          sugar.destroy();
-          return { result: 'unavailable' };
-        }
+        // if (!matchSugars(sugar, fields.current)) {
+        //   console.error(
+        //     'The keys of the sugar template and map do not match. This is probably a problem on the SugarForm side, so please report it.'
+        //   );
+        //   sugar.destroy();
+        //   return { result: 'unavailable' };
+        // }
 
         const results: [string, SugarSetResult<unknown>][] = await Promise.all(
-          [...sugars.current.entries()].map(async ([key, s]) => {
+          Object.entries(fields.current!).map(async ([key, s]) => {
             if (key in value) {
               const nestedValue = (value as Record<string, unknown>)[key];
               const result = await s.setTemplate(nestedValue, executeSet);
@@ -165,35 +186,36 @@ export function useObject<T extends SugarValueObject>(
     // アンマウント時にsugarの状態をunavailableにする。
     return () => {
       sugar.destroy();
-      if (sugars.current) {
-        [...sugars.current.values()].forEach((sugar) => {
-          sugar.removeEventListener('change', dispatchChange);
+      if (fields.current) {
+        Object.values(fields.current).forEach((sugar) => {
+          sugar.removeEventListener('change', dispatchEvent);
           sugar.removeEventListener('blur', dispatchBlur);
         });
+        sugarInitializer.current = sugarInitializer.current.filter(
+          (i) =>i !== initializer
+        );
       }
     };
   }, [sugar]);
 
   return {
-    fields: Object.fromEntries(
-      sugars.current.entries()
-    ) as SugarUseObjectResult<T>['fields'],
+    fields: fields.current,
   };
 }
 
 /**
  * mapの中に、sugarのtemplateと同じkeyがあるかどうかを確認する。
  */
-function matchSugars<T extends SugarValueObject>(
-  sugar: Sugar<T>,
-  map: Map<string, Sugar<unknown>> | undefined
-): map is Map<string, Sugar<unknown>> {
-  if (map === undefined) {
-    return false;
-  }
-
-  const templateKeys = new Set(Object.keys((sugar as SugarInner<T>).template));
-  const mapKeys = new Set(map.keys());
-
-  return templateKeys.isSubsetOf(mapKeys) && mapKeys.isSubsetOf(templateKeys);
-}
+// function matchSugars<T extends SugarValueObject>(
+//   sugar: Sugar<T>,
+//   map: Map<string, Sugar<unknown>> | undefined
+// ): map is Map<string, Sugar<unknown>> {
+//   if (map === undefined) {
+//     return false;
+//   }
+//
+//   const templateKeys = new Set(Object.keys((sugar as SugarInner<T>).template));
+//   const mapKeys = new Set(map.keys());
+//
+//   return templateKeys.isSubsetOf(mapKeys) && mapKeys.isSubsetOf(templateKeys);
+// }
