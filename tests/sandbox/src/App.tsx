@@ -1,7 +1,13 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 // Demo showing how validation errors appear in real usage
 import './App.css';
-import { useForm, TextInput, NumberInput, type Sugar } from '@sugarform/core';
+import {
+  useForm,
+  TextInput,
+  NumberInput,
+  type Sugar,
+  type SugarTemplateState,
+} from '@sugarform/core';
 
 type Birthday = {
   year: number;
@@ -21,36 +27,74 @@ type FormType = {
 };
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  const initialTemplate: SugarTemplateState<FormType> = isLoading
+    ? { status: 'pending' }
+    : {
+        status: 'resolved',
+        value: {
+          person_a: {
+            firstName: 'Alice',
+            lastName: 'Smith',
+            birthday: { year: 2000, month: 1, day: 1 },
+          },
+          person_b: {
+            firstName: 'Bob',
+            lastName: 'Johnson',
+            birthday: { year: 2000, month: 1, day: 1 },
+          },
+        },
+      };
+
   const { sugar, collect } = useForm<FormType>({
-    template: {
-      person_a: {
-        firstName: 'Alice',
-        lastName: 'Smith',
-        birthday: { year: 2000, month: 1, day: 1 },
-      },
-      person_b: {
-        firstName: 'Bob',
-        lastName: 'Johnson',
-        birthday: { year: 2000, month: 1, day: 1 },
-      },
-    },
+    template: initialTemplate,
   });
 
   const { fields } = sugar.useObject();
+  const isPending = sugar.useIsPending();
 
   return (
     <>
       <h1>Hello, Sugarform!</h1>
-      <h2>Person A</h2>
-      <PersonInput sugar={fields.person_a} />
-      <h2>Person B</h2>
-      <PersonInput sugar={fields.person_b} />
+      {isPending ? (
+        <div>Loading template...</div>
+      ) : (
+        <>
+          <h2>Person A</h2>
+          <PersonInput sugar={fields.person_a} />
+          <h2>Person B</h2>
+          <PersonInput sugar={fields.person_b} />
+        </>
+      )}
+      <button
+        type="button"
+        onClick={() => {
+          setIsLoading(false);
+          sugar.setTemplate({
+            person_a: {
+              firstName: 'Alice',
+              lastName: 'Smith',
+              birthday: { year: 2000, month: 1, day: 1 },
+            },
+            person_b: {
+              firstName: 'Bob',
+              lastName: 'Johnson',
+              birthday: { year: 2000, month: 1, day: 1 },
+            },
+          });
+        }}
+        disabled={!isPending}
+      >
+        Load Data
+      </button>
       <button
         type="button"
         onClick={async () => {
           const result = await collect();
           console.log(result);
         }}
+        disabled={isPending}
       >
         collect
       </button>
@@ -60,6 +104,11 @@ function App() {
 
 function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
   const { fields } = sugar.useObject();
+  const isPending = sugar.useIsPending();
+
+  if (isPending) {
+    return <div>Loading person data...</div>;
+  }
 
   return (
     <div>
@@ -78,6 +127,7 @@ function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
 
 function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
   const { fields } = sugar.useObject();
+  const isPending = sugar.useIsPending();
 
   const errors = sugar.useValidation<string>(
     useCallback(async (value, fail) => {
@@ -106,6 +156,10 @@ function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
       }
     }, [])
   );
+
+  if (isPending) {
+    return <div>Loading birthday data...</div>;
+  }
 
   return (
     <div>

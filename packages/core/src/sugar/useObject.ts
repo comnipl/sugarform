@@ -3,6 +3,7 @@ import {
   Sugar,
   SugarGetResult,
   SugarSetResult,
+  SugarTemplateState,
   SugarValue,
   SugarValueObject,
 } from './types';
@@ -36,7 +37,33 @@ export function useObject<T extends SugarValueObject>(
       {
         get: (target: Record<string, SugarInner<unknown>>, prop: string, _) => {
           if (!(prop in target)) {
-            const s = new SugarInner((sugar as SugarInner<T>).template?.[prop]);
+            const parentTemplate = (sugar as SugarInner<T>).template;
+            let childTemplate: SugarTemplateState<unknown>;
+
+            if (parentTemplate?.status === 'pending') {
+              childTemplate = { status: 'pending' };
+            } else if (parentTemplate?.status === 'resolved') {
+              const parentValue = parentTemplate.value as Record<
+                string,
+                unknown
+              >;
+              if (
+                parentValue &&
+                typeof parentValue === 'object' &&
+                prop in parentValue
+              ) {
+                childTemplate = {
+                  status: 'resolved',
+                  value: parentValue[prop],
+                };
+              } else {
+                childTemplate = undefined;
+              }
+            } else {
+              childTemplate = undefined;
+            }
+
+            const s = new SugarInner(childTemplate);
             sugarInitializer.current.forEach((initializer) => {
               s.addEventListener('change', initializer.dispatchChange);
               s.addEventListener('blur', initializer.dispatchBlur);
@@ -59,10 +86,31 @@ export function useObject<T extends SugarValueObject>(
       dispatchBlur,
     };
 
+    const onTemplateChange = () => {
+      const parentTemplate = (sugar as SugarInner<T>).template;
+      Object.entries(fields.current!).forEach(([key, childSugar]) => {
+        const childSugarInner = childSugar as SugarInner<unknown>;
+        if (parentTemplate?.status === 'pending') {
+          childSugarInner.setPendingTemplate();
+        } else if (parentTemplate?.status === 'resolved') {
+          const parentValue = parentTemplate.value as Record<string, unknown>;
+          if (
+            parentValue &&
+            typeof parentValue === 'object' &&
+            key in parentValue
+          ) {
+            childSugarInner.setTemplate(parentValue[key], false);
+          }
+        }
+      });
+    };
+
     Object.values(fields.current!).forEach((sugar) => {
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });
+
+    sugar.addEventListener('templateChange', onTemplateChange);
     sugarInitializer.current.push(initializer);
 
     sugar.ready(
@@ -189,9 +237,10 @@ export function useObject<T extends SugarValueObject>(
       sugar.destroy();
       if (fields.current) {
         Object.values(fields.current).forEach((sugar) => {
-          sugar.removeEventListener('change', dispatchEvent);
+          sugar.removeEventListener('change', dispatchChange);
           sugar.removeEventListener('blur', dispatchBlur);
         });
+        sugar.removeEventListener('templateChange', onTemplateChange);
         sugarInitializer.current = sugarInitializer.current.filter(
           (i) => i !== initializer
         );

@@ -1,6 +1,11 @@
 import { useRef } from 'react';
 import { SugarInner } from '../sugar';
-import { Sugar, SugarValue, SugarGetResult } from '../sugar/types';
+import {
+  Sugar,
+  SugarValue,
+  SugarGetResult,
+  SugarTemplateState,
+} from '../sugar/types';
 
 export interface UseFormResult<T extends SugarValue> {
   sugar: Sugar<T>;
@@ -10,7 +15,7 @@ export interface UseFormResult<T extends SugarValue> {
 export const useForm = <T extends SugarValue>({
   template,
 }: {
-  template?: T;
+  template?: SugarTemplateState<T>;
 } = {}): UseFormResult<T> => {
   const sugar = useRef<Sugar<T>>(undefined);
   if (!sugar.current) {
