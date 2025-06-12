@@ -4,7 +4,6 @@ import { describe, expect, test } from 'vitest';
 import { checkPending } from '../util/checkPending';
 import { describeWithStrict } from '../util/describeWithStrict';
 import { Sugar } from '@sugarform/core';
-import React, { act } from 'react';
 import { SugarValue } from '../../../packages/core/dist/sugar/types';
 
 const Components: Component[] = [
