@@ -24,14 +24,14 @@ function App() {
   const { sugar, collect } = useForm<FormType>({
     template: {
       person_a: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
+        firstName: 'Alice',
+        lastName: 'Smith',
+        birthday: { year: 2000, month: 1, day: 1 },
       },
       person_b: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
+        firstName: 'Bob',
+        lastName: 'Johnson',
+        birthday: { year: 2000, month: 1, day: 1 },
       },
     },
   });
@@ -54,7 +54,6 @@ function App() {
       >
         collect
       </button>
-      <hr />
     </>
   );
 }

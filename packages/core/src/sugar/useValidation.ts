@@ -73,7 +73,8 @@ export function useValidation<T extends SugarValue, V>(
   // run once on mount
   useEffect(() => {
     run('input');
-  }, [run]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `run` should not be executed again even if `run` changes
+  }, []);
 
   return errors;
 }

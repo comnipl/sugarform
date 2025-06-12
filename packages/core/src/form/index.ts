@@ -10,8 +10,8 @@ export interface UseFormResult<T extends SugarValue> {
 export const useForm = <T extends SugarValue>({
   template,
 }: {
-  template: T;
-}): UseFormResult<T> => {
+  template?: T;
+} = {}): UseFormResult<T> => {
   const sugar = useRef<Sugar<T>>(undefined);
   if (!sugar.current) {
     sugar.current = new SugarInner<T>(template);
