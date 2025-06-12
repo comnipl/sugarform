@@ -42,8 +42,8 @@ describeWithStrict('Sugar#useIsPending', () => {
     const { result } = renderHook(() =>
       useForm<string>({ template: { status: 'pending' } })
     );
-    
-    const { result: isPendingResult } = renderHook(() => 
+
+    const { result: isPendingResult } = renderHook(() =>
       result.current.sugar.useIsPending()
     );
 
@@ -65,7 +65,7 @@ describeWithStrict('Sugar#useIsPending', () => {
     );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
-    const { result: childIsPendingResult } = renderHook(() => 
+    const { result: childIsPendingResult } = renderHook(() =>
       obj.current.fields.a!.useIsPending()
     );
 
@@ -87,10 +87,10 @@ describeWithStrict('Sugar#useIsPending', () => {
     );
     await act(async () => {});
 
-    const { result: childAIsPendingResult } = renderHook(() => 
+    const { result: childAIsPendingResult } = renderHook(() =>
       obj.current.fields.a!.useIsPending()
     );
-    const { result: childBIsPendingResult } = renderHook(() => 
+    const { result: childBIsPendingResult } = renderHook(() =>
       obj.current.fields.b!.useIsPending()
     );
 

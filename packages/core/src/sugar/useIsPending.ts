@@ -11,16 +11,37 @@ export function useIsPending<T extends SugarValue>(sugar: Sugar<T>): boolean {
   });
 
   useEffect(() => {
-    const updatePendingState = () => {
+    const checkPendingState = () => {
       const sugarInner = sugar as unknown as SugarInner<T>;
       const newIsPending = sugarInner.template?.status === 'pending';
       setIsPending(newIsPending);
     };
 
-    sugar.addEventListener('templateChange', updatePendingState);
+    checkPendingState();
+
+    const originalSetTemplate = sugar.setTemplate.bind(sugar);
+    sugar.setTemplate = async (value: T, executeSet = true) => {
+      const result = await originalSetTemplate(value, executeSet);
+      checkPendingState();
+      return result;
+    };
+
+    const sugarInner = sugar as unknown as SugarInner<T>;
+    const originalSetPendingTemplate = sugarInner.setPendingTemplate?.bind(
+      sugarInner
+    );
+    if (originalSetPendingTemplate) {
+      sugarInner.setPendingTemplate = () => {
+        originalSetPendingTemplate();
+        checkPendingState();
+      };
+    }
 
     return () => {
-      sugar.removeEventListener('templateChange', updatePendingState);
+      sugar.setTemplate = originalSetTemplate;
+      if (originalSetPendingTemplate) {
+        sugarInner.setPendingTemplate = originalSetPendingTemplate;
+      }
     };
   }, [sugar]);
 

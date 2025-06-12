@@ -158,7 +158,6 @@ export class SugarInner<T extends SugarValue> {
 
   setTemplate(value: T, executeSet = true): Promise<SugarSetResult<T>> {
     this.template = { status: 'resolved', value };
-    this.dispatchEvent('templateChange');
 
     switch (this.status.status) {
       case 'unavailable':
@@ -186,7 +185,9 @@ export class SugarInner<T extends SugarValue> {
 
   setPendingTemplate(): void {
     this.template = { status: 'pending' };
-    this.dispatchEvent('templateChange');
+    if (this.status.status === 'ready' && this.status.templateSetter) {
+      this.status.templateSetter(undefined as T, false);
+    }
   }
 
   private getTemplateValue(): T | undefined {

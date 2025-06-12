@@ -86,31 +86,11 @@ export function useObject<T extends SugarValueObject>(
       dispatchBlur,
     };
 
-    const onTemplateChange = () => {
-      const parentTemplate = (sugar as SugarInner<T>).template;
-      Object.entries(fields.current!).forEach(([key, childSugar]) => {
-        const childSugarInner = childSugar as SugarInner<unknown>;
-        if (parentTemplate?.status === 'pending') {
-          childSugarInner.setPendingTemplate();
-        } else if (parentTemplate?.status === 'resolved') {
-          const parentValue = parentTemplate.value as Record<string, unknown>;
-          if (
-            parentValue &&
-            typeof parentValue === 'object' &&
-            key in parentValue
-          ) {
-            childSugarInner.setTemplate(parentValue[key], false);
-          }
-        }
-      });
-    };
-
     Object.values(fields.current!).forEach((sugar) => {
       sugar.addEventListener('change', dispatchChange);
       sugar.addEventListener('blur', dispatchBlur);
     });
 
-    sugar.addEventListener('templateChange', onTemplateChange);
     sugarInitializer.current.push(initializer);
 
     sugar.ready(
@@ -205,30 +185,74 @@ export function useObject<T extends SugarValueObject>(
         //   return { result: 'unavailable' };
         // }
 
-        const results: [string, SugarSetResult<unknown>][] = await Promise.all(
-          Object.entries(fields.current!).map(async ([key, s]) => {
-            if (key in value) {
-              const nestedValue = (value as Record<string, unknown>)[key];
-              const result = await s.setTemplate(nestedValue, executeSet);
-              return [key, result];
-            }
-            return [key, { result: 'success' as const }];
-          })
-        );
+        const parentTemplate = (sugar as SugarInner<T>).template;
 
-        const unavailables = results.filter(
-          ([_, value]) => value.result === 'unavailable'
-        );
-        if (unavailables.length > 0) {
-          console.error(
-            `Setting template for useObject sugar: ${unavailables
-              .map(([key, _]) => key)
-              .join(', ')} is unavailable.`
+        if (parentTemplate?.status === 'pending') {
+          await Promise.all(
+            Object.entries(fields.current!).map(async ([_, s]) => {
+              (s as SugarInner<unknown>).setPendingTemplate();
+            })
           );
-          return { result: 'unavailable' };
-        }
+          return { result: 'success' };
+        } else if (parentTemplate?.status === 'resolved') {
+          const parentValue = parentTemplate.value as Record<string, unknown>;
+          const results: [string, SugarSetResult<unknown>][] =
+            await Promise.all(
+              Object.entries(fields.current!).map(async ([key, s]) => {
+                if (
+                  parentValue &&
+                  typeof parentValue === 'object' &&
+                  key in parentValue
+                ) {
+                  const result = await s.setTemplate(
+                    parentValue[key],
+                    executeSet
+                  );
+                  return [key, result];
+                }
+                return [key, { result: 'success' as const }];
+              })
+            );
 
-        return { result: 'success' };
+          const unavailables = results.filter(
+            ([_, value]) => value.result === 'unavailable'
+          );
+          if (unavailables.length > 0) {
+            console.error(
+              `Setting template for useObject sugar: ${unavailables
+                .map(([key, _]) => key)
+                .join(', ')} is unavailable.`
+            );
+            return { result: 'unavailable' };
+          }
+
+          return { result: 'success' };
+        } else {
+          const results: [string, SugarSetResult<unknown>][] =
+            await Promise.all(
+              Object.entries(fields.current!).map(async ([key, s]) => {
+                const result = await s.setTemplate(
+                  undefined as unknown,
+                  executeSet
+                );
+                return [key, result];
+              })
+            );
+
+          const unavailables = results.filter(
+            ([_, value]) => value.result === 'unavailable'
+          );
+          if (unavailables.length > 0) {
+            console.error(
+              `Setting template for useObject sugar: ${unavailables
+                .map(([key, _]) => key)
+                .join(', ')} is unavailable.`
+            );
+            return { result: 'unavailable' };
+          }
+
+          return { result: 'success' };
+        }
       }
     );
 
@@ -240,7 +264,6 @@ export function useObject<T extends SugarValueObject>(
           sugar.removeEventListener('change', dispatchChange);
           sugar.removeEventListener('blur', dispatchBlur);
         });
-        sugar.removeEventListener('templateChange', onTemplateChange);
         sugarInitializer.current = sugarInitializer.current.filter(
           (i) => i !== initializer
         );

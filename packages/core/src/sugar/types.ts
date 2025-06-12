@@ -82,5 +82,4 @@ export type SugarEvent = {
   change: undefined;
   blur: undefined;
   submit: undefined;
-  templateChange: undefined;
 };
