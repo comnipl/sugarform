@@ -15,7 +15,7 @@ describeWithStrict('Sugar#useValidation', () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '', b: '' } })
     );
-    const { result: obj } = renderHook(() => sugar.current.useObject());
+    const { result: obj } = renderHook(() => sugar.current.sugar.useObject());
 
     const validateA = async (
       v: string,
@@ -53,7 +53,7 @@ describeWithStrict('Sugar#useValidation', () => {
     expect(errB.current).toStrictEqual([]);
 
     await act(async () => {
-      await sugar.current.get(true);
+      await sugar.current.sugar.get(true);
     });
 
     await waitFor(() => expect(errA.current).toStrictEqual([]));
@@ -64,7 +64,7 @@ describeWithStrict('Sugar#useValidation', () => {
     const { result: sugar } = renderHook(() =>
       useForm({ template: { a: '' } })
     );
-    const { result: obj } = renderHook(() => sugar.current.useObject());
+    const { result: obj } = renderHook(() => sugar.current.sugar.useObject());
 
     const validate = async (
       v: string,
@@ -78,7 +78,7 @@ describeWithStrict('Sugar#useValidation', () => {
     await act(async () => {});
 
     await act(async () => {
-      await expect(sugar.current.get(true)).resolves.toStrictEqual({
+      await expect(sugar.current.sugar.get(true)).resolves.toStrictEqual({
         result: 'validation_fault',
       });
     });

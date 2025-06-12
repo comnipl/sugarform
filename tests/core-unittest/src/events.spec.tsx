@@ -9,19 +9,19 @@ describeWithStrict('Sugar#dispatchEvent', () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
     const before_ready_listener = vi.fn();
-    result.current.addEventListener('change', before_ready_listener);
+    result.current.sugar.addEventListener('change', before_ready_listener);
 
-    render(<TextInput sugar={result.current} />);
+    render(<TextInput sugar={result.current.sugar} />);
 
     const after_ready_listener = vi.fn();
-    result.current.addEventListener('change', after_ready_listener);
+    result.current.sugar.addEventListener('change', after_ready_listener);
 
     expect(before_ready_listener).toHaveBeenCalledTimes(0);
     expect(after_ready_listener).toHaveBeenCalledTimes(0);
 
     await userEvent.type(screen.getByRole('textbox'), 'test');
 
-    await expect(result.current.get()).resolves.toStrictEqual({
+    await expect(result.current.sugar.get()).resolves.toStrictEqual({
       result: 'success',
       value: 'test',
     });
@@ -34,12 +34,12 @@ describeWithStrict('Sugar#dispatchEvent', () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
     const before_ready_listener = vi.fn();
-    result.current.addEventListener('blur', before_ready_listener);
+    result.current.sugar.addEventListener('blur', before_ready_listener);
 
-    render(<TextInput sugar={result.current} />);
+    render(<TextInput sugar={result.current.sugar} />);
 
     const after_ready_listener = vi.fn();
-    result.current.addEventListener('blur', after_ready_listener);
+    result.current.sugar.addEventListener('blur', after_ready_listener);
 
     await userEvent.type(screen.getByRole('textbox'), 'test');
 
@@ -48,7 +48,7 @@ describeWithStrict('Sugar#dispatchEvent', () => {
 
     await userEvent.tab();
 
-    await expect(result.current.get()).resolves.toStrictEqual({
+    await expect(result.current.sugar.get()).resolves.toStrictEqual({
       result: 'success',
       value: 'test',
     });

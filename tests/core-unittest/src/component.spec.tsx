@@ -24,11 +24,11 @@ describeWithStrict('Component requirements', () => {
   describe.each<Component>(Components)('$name', (c) => {
     test('Component should be ready after render', async () => {
       const { result } = renderHook(() => useForm({ template: c.template }));
-      const get = result.current.get();
+      const get = result.current.sugar.get();
 
       expect(await checkPending(get)).toStrictEqual({ resolved: false });
 
-      render(<c.Component sugar={result.current} />);
+      render(<c.Component sugar={result.current.sugar} />);
 
       expect(await checkPending(get)).toStrictEqual({
         resolved: true,
@@ -41,13 +41,13 @@ describeWithStrict('Component requirements', () => {
 
     test('Sugar should be destroyed after unmount', async () => {
       const { result } = renderHook(() => useForm({ template: c.template }));
-      const { unmount } = render(<c.Component sugar={result.current} />);
-      await expect(result.current.get()).resolves.toStrictEqual({
+      const { unmount } = render(<c.Component sugar={result.current.sugar} />);
+      await expect(result.current.sugar.get()).resolves.toStrictEqual({
         result: 'success',
         value: c.template,
       });
       unmount();
-      await expect(result.current.get()).resolves.toStrictEqual({
+      await expect(result.current.sugar.get()).resolves.toStrictEqual({
         result: 'unavailable',
       });
     });

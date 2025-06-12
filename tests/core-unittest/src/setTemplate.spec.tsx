@@ -10,18 +10,18 @@ describeWithStrict('Sugar#setTemplate', () => {
       useForm<string>({ template: 'original' })
     );
 
-    render(<TextInput sugar={result.current} />);
+    render(<TextInput sugar={result.current.sugar} />);
     await act(async () => {});
 
-    await result.current.setTemplate('new template', true);
+    await result.current.sugar.setTemplate('new template', true);
 
-    const getResult = await result.current.get();
+    const getResult = await result.current.sugar.get();
     expect(getResult).toStrictEqual({
       result: 'success',
       value: 'new template',
     });
 
-    expect((result.current as SugarInner<string>).template).toBe(
+    expect((result.current.sugar as SugarInner<string>).template).toBe(
       'new template'
     );
   });
@@ -31,19 +31,19 @@ describeWithStrict('Sugar#setTemplate', () => {
       useForm<string>({ template: 'original' })
     );
 
-    render(<TextInput sugar={result.current} />);
+    render(<TextInput sugar={result.current.sugar} />);
     await act(async () => {});
 
-    await result.current.set('current value');
-    await result.current.setTemplate('new template', false);
+    await result.current.sugar.set('current value');
+    await result.current.sugar.setTemplate('new template', false);
 
-    const getResult = await result.current.get();
+    const getResult = await result.current.sugar.get();
     expect(getResult).toStrictEqual({
       result: 'success',
       value: 'current value',
     });
 
-    expect((result.current as SugarInner<string>).template).toBe(
+    expect((result.current.sugar as SugarInner<string>).template).toBe(
       'new template'
     );
   });
@@ -53,18 +53,18 @@ describeWithStrict('Sugar#setTemplate', () => {
       useForm<string>({ template: 'original' })
     );
 
-    render(<TextInput sugar={result.current} />);
+    render(<TextInput sugar={result.current.sugar} />);
     await act(async () => {});
 
-    await result.current.setTemplate('new template');
+    await result.current.sugar.setTemplate('new template');
 
-    const getResult = await result.current.get();
+    const getResult = await result.current.sugar.get();
     expect(getResult).toStrictEqual({
       result: 'success',
       value: 'new template',
     });
 
-    expect((result.current as SugarInner<string>).template).toBe(
+    expect((result.current.sugar as SugarInner<string>).template).toBe(
       'new template'
     );
   });
@@ -73,7 +73,7 @@ describeWithStrict('Sugar#setTemplate', () => {
     const { result } = renderHook(() =>
       useForm({ template: { a: 'initial', b: 'initial' } })
     );
-    const { result: obj } = renderHook(() => result.current.useObject());
+    const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
     render(
       <>
@@ -83,16 +83,16 @@ describeWithStrict('Sugar#setTemplate', () => {
     );
     await act(async () => {});
 
-    await result.current.setTemplate({ a: 'new-a', b: 'new-b' }, true);
+    await result.current.sugar.setTemplate({ a: 'new-a', b: 'new-b' }, true);
 
-    const getResult = await result.current.get();
+    const getResult = await result.current.sugar.get();
     expect(getResult).toStrictEqual({
       result: 'success',
       value: { a: 'new-a', b: 'new-b' },
     });
 
     expect(
-      (result.current as SugarInner<{ a: string; b: string }>).template
+      (result.current.sugar as SugarInner<{ a: string; b: string }>).template
     ).toStrictEqual({ a: 'new-a', b: 'new-b' });
 
     expect((obj.current.fields.a as SugarInner<string>).template).toBe('new-a');

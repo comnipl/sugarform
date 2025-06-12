@@ -8,13 +8,13 @@ describeWithStrict('Sugar#destroy before ready', () => {
   test('destroy resolves pending promises', async () => {
     const { result } = renderHook(() => useForm<string>({ template: '' }));
 
-    const getPromise = result.current.get();
-    const setPromise = result.current.set('test');
+    const getPromise = result.current.sugar.get();
+    const setPromise = result.current.sugar.set('test');
 
     expect(await checkPending(getPromise)).toStrictEqual({ resolved: false });
     expect(await checkPending(setPromise)).toStrictEqual({ resolved: false });
 
-    result.current.destroy();
+    result.current.sugar.destroy();
 
     await expect(getPromise).resolves.toStrictEqual({ result: 'unavailable' });
     await expect(setPromise).resolves.toStrictEqual({ result: 'unavailable' });
