@@ -73,7 +73,7 @@ export function useValidation<T extends SugarValue, V>(
   // run once on mount
   useEffect(() => {
     run('input');
-  }, [run]);
+  }, []);
 
   return errors;
 }
