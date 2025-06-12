@@ -7,10 +7,12 @@ export interface UseFormResult<T extends SugarValue> {
   collect: () => Promise<SugarGetResult<T>>;
 }
 
-export const useForm = <T extends SugarValue>(): UseFormResult<T> => {
+export const useForm = <T extends SugarValue>({ template }: {
+  template?: T;
+} = {}): UseFormResult<T> => {
   const sugar = useRef<Sugar<T>>(undefined);
   if (!sugar.current) {
-    sugar.current = new SugarInner<T>();
+    sugar.current = new SugarInner<T>(template);
   }
 
   const collect = (): Promise<SugarGetResult<T>> => sugar.current!.get(true);

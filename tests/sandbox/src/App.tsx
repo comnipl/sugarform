@@ -21,7 +21,19 @@ type FormType = {
 };
 
 function App() {
-  const { sugar, collect } = useForm<FormType>();
+  const { sugar, collect } = useForm<FormType>({
+    template: {
+      person_a: {
+        firstName: 'Alice',
+        lastName: 'Smith',
+        birthday: { year: 2000, month: 1, day: 1 },
+      },
+      person_b: {
+        firstName: 'Bob',
+        lastName: 'Johnson',
+        birthday: { year: 2000, month: 1, day: 1 },
+      },
+    }  });
 
   const { fields } = sugar.useObject();
 
@@ -41,7 +53,6 @@ function App() {
       >
         collect
       </button>
-      <hr />
     </>
   );
 }

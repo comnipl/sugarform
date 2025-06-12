@@ -33,7 +33,7 @@ export function useObject<T extends SugarValueObject>(
     fields.current = new Proxy({}, {
       get: (target: Record<string, SugarInner<unknown>>, prop: string, _) => {
         if (!(prop in target)) {
-          const s = new SugarInner();
+          const s = new SugarInner((sugar as SugarInner<T>).template?.[prop]);
           sugarInitializer.current.forEach((initializer) => {
             s.addEventListener('change', initializer.dispatchChange);
             s.addEventListener('blur', initializer.dispatchBlur);

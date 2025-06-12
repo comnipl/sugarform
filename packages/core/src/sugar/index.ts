@@ -68,7 +68,7 @@ export class SugarInner<T extends SugarValue> {
     (stage: ValidationStage, value: T) => Promise<boolean>
   > = new Set();
 
-  constructor() {
+  constructor(template?: T) {
     const { promise: getPromise, resolve: resolveGetPromise } =
       Promise.withResolvers<SugarGetResult<T>>();
     const { promise: setPromise, resolve: resolveSetPromise } =
@@ -90,7 +90,7 @@ export class SugarInner<T extends SugarValue> {
       lock: false,
     };
 
-    this.template = undefined;
+    this.template = template;
   }
 
   registerValidator(
@@ -215,7 +215,8 @@ export class SugarInner<T extends SugarValue> {
       status.lock = true;
 
       const initial = status.recentValue ?? this.template;
-      if (initial) {
+      console.log(`Sugar ready: initial value is`, initial);
+      if (initial !== undefined) {
         status.resolveSetPromise(
           await setter(initial)
         );
