@@ -21,20 +21,7 @@ type FormType = {
 };
 
 function App() {
-  const { sugar, collect } = useForm<FormType>({
-    template: {
-      person_a: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
-      },
-      person_b: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
-      },
-    },
-  });
+  const { sugar, collect } = useForm<FormType>();
 
   const { fields } = sugar.useObject();
 

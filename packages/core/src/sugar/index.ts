@@ -63,12 +63,12 @@ export class SugarInner<T extends SugarValue> {
         status: 'unavailable';
       };
 
-  template: T;
+  template: T | undefined;
   private validators: Set<
     (stage: ValidationStage, value: T) => Promise<boolean>
   > = new Set();
 
-  constructor(template: T) {
+  constructor() {
     const { promise: getPromise, resolve: resolveGetPromise } =
       Promise.withResolvers<SugarGetResult<T>>();
     const { promise: setPromise, resolve: resolveSetPromise } =
@@ -90,7 +90,7 @@ export class SugarInner<T extends SugarValue> {
       lock: false,
     };
 
-    this.template = template;
+    this.template = undefined;
   }
 
   registerValidator(
@@ -214,9 +214,12 @@ export class SugarInner<T extends SugarValue> {
       const status = this.status;
       status.lock = true;
 
-      status.resolveSetPromise(
-        await setter(status.recentValue ?? this.template)
-      );
+      const initial = status.recentValue ?? this.template;
+      if (initial) {
+        status.resolveSetPromise(
+          await setter(initial)
+        );
+      }
       status.resolveGetPromise(await getter(false));
 
       if (status.recentTemplateValue !== null) {
