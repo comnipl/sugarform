@@ -39,6 +39,7 @@ export type SugarTemplateSetter<T extends SugarValue> = (
 
 import type { SugarUseObject } from './useObject';
 import type { SugarUseValidation } from './useValidation';
+import type { SugarUseTransform } from './useTransform';
 import type { SugarUseIsPending } from './useIsPending';
 
 type SugarType<T extends SugarValue> = {
@@ -53,6 +54,7 @@ type SugarType<T extends SugarValue> = {
   destroy: () => void;
   useObject: SugarUseObject<T>;
   useValidation: SugarUseValidation<T>;
+  useTransform: SugarUseTransform<T>;
   useIsPending: SugarUseIsPending;
   addEventListener: <K extends keyof SugarEvent>(
     type: K,
