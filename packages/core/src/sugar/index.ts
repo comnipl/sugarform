@@ -18,12 +18,8 @@ import {
   ValidationStage,
   FailFn,
 } from './useValidation';
-<<<<<<< HEAD
 import { useTransform, SugarUseTransform } from './useTransform';
-||||||| 2096774
-=======
 import { useIsPending, SugarUseIsPending } from './useIsPending';
->>>>>>> origin/main
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -294,16 +290,12 @@ export class SugarInner<T extends SugarValue> {
     deps?: React.DependencyList
   ) =>
     useValidation(this as Sugar<T>, validator, deps)) as SugarUseValidation<T>;
-<<<<<<< HEAD
 
   useTransform: SugarUseTransform<T> = (<U extends SugarValue>(config: {
     forward: (value: T) => Promise<U>;
     backward: (value: U) => Promise<T>;
   }) => useTransform(this as Sugar<T>, config)) as SugarUseTransform<T>;
-||||||| 2096774
-=======
 
   useIsPending: SugarUseIsPending = (() =>
     useIsPending(this as Sugar<T>)) as SugarUseIsPending;
->>>>>>> origin/main
 }

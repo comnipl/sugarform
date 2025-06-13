@@ -18,12 +18,10 @@ export function useTransform<T extends SugarValue, U extends SugarValue>(
   const transformedSugar = useRef<Sugar<U>>(undefined);
 
   if (!transformedSugar.current) {
-    const originalTemplate = (sugar as SugarInner<T>).template;
-    transformedSugar.current = new SugarInner<U>(originalTemplate as unknown as U);
+    transformedSugar.current = new SugarInner<U>({ status: 'pending' });
   }
 
   useEffect(() => {
-
     transformedSugar.current!.addEventListener('change', () =>
       sugar.dispatchEvent('change')
     );
@@ -55,6 +53,15 @@ export function useTransform<T extends SugarValue, U extends SugarValue>(
         );
       }
     );
+
+    const originalTemplate = (sugar as SugarInner<T>).template;
+    if (originalTemplate?.status === 'pending') {
+      (transformedSugar.current as SugarInner<U>).setPendingTemplate();
+    } else if (originalTemplate?.status === 'resolved') {
+      config.forward(originalTemplate.value).then((transformedValue) => {
+        transformedSugar.current!.setTemplate(transformedValue, false);
+      });
+    }
 
     return () => {
       transformedSugar.current!.destroy();
