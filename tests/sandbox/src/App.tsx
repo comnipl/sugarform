@@ -1,13 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 // Demo showing how validation errors appear in real usage
 import './App.css';
-import {
-  useForm,
-  TextInput,
-  NumberInput,
-  type Sugar,
-  type SugarTemplateState,
-} from '@sugarform/core';
+import { useForm, TextInput, NumberInput, type Sugar } from '@sugarform/core';
 
 type Birthday = {
   year: number;
@@ -27,74 +21,23 @@ type FormType = {
 };
 
 function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const initialTemplate: SugarTemplateState<FormType> = isLoading
-    ? { status: 'pending' }
-    : {
-        status: 'resolved',
-        value: {
-          person_a: {
-            firstName: 'Alice',
-            lastName: 'Smith',
-            birthday: { year: 2000, month: 1, day: 1 },
-          },
-          person_b: {
-            firstName: 'Bob',
-            lastName: 'Johnson',
-            birthday: { year: 2000, month: 1, day: 1 },
-          },
-        },
-      };
-
-  const { sugar, collect } = useForm<FormType>({
-    template: initialTemplate,
-  });
+  const { sugar, collect } = useForm<FormType>();
 
   const { fields } = sugar.useObject();
-  const isPending = sugar.useIsPending();
 
   return (
     <>
       <h1>Hello, Sugarform!</h1>
-      {isPending ? (
-        <div>Loading template...</div>
-      ) : (
-        <>
-          <h2>Person A</h2>
-          <PersonInput sugar={fields.person_a} />
-          <h2>Person B</h2>
-          <PersonInput sugar={fields.person_b} />
-        </>
-      )}
-      <button
-        type="button"
-        onClick={() => {
-          setIsLoading(false);
-          sugar.setTemplate({
-            person_a: {
-              firstName: 'Alice',
-              lastName: 'Smith',
-              birthday: { year: 2000, month: 1, day: 1 },
-            },
-            person_b: {
-              firstName: 'Bob',
-              lastName: 'Johnson',
-              birthday: { year: 2000, month: 1, day: 1 },
-            },
-          });
-        }}
-        disabled={!isPending}
-      >
-        Load Data
-      </button>
+      <h2>Person A</h2>
+      <PersonInput sugar={fields.person_a} />
+      <h2>Person B</h2>
+      <PersonInput sugar={fields.person_b} />
       <button
         type="button"
         onClick={async () => {
           const result = await collect();
           console.log(result);
         }}
-        disabled={isPending}
       >
         collect
       </button>

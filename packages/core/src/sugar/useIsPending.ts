@@ -27,9 +27,8 @@ export function useIsPending<T extends SugarValue>(sugar: Sugar<T>): boolean {
     };
 
     const sugarInner = sugar as unknown as SugarInner<T>;
-    const originalSetPendingTemplate = sugarInner.setPendingTemplate?.bind(
-      sugarInner
-    );
+    const originalSetPendingTemplate =
+      sugarInner.setPendingTemplate?.bind(sugarInner);
     if (originalSetPendingTemplate) {
       sugarInner.setPendingTemplate = () => {
         originalSetPendingTemplate();

@@ -61,12 +61,12 @@ describeWithStrict('Sugar#useIsPending', () => {
 
   test('propagates pending state to nested objects', async () => {
     const { result } = renderHook(() =>
-      useForm<Record<string, string>>({ template: { status: 'pending' } })
+      useForm<{ a: string }>({ template: { status: 'pending' } })
     );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
     const { result: childIsPendingResult } = renderHook(() =>
-      obj.current.fields.a!.useIsPending()
+      obj.current.fields.a.useIsPending()
     );
 
     expect(childIsPendingResult.current).toBe(true);
@@ -74,24 +74,23 @@ describeWithStrict('Sugar#useIsPending', () => {
 
   test('updates nested objects when parent template changes', async () => {
     const { result } = renderHook(() =>
-      useForm<Record<string, string>>({ template: { status: 'pending' } })
+      useForm<{ a: string; b: string }>({ template: { status: 'pending' } })
     );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
     render(
       <>
-        {/* Fields 'a' and 'b' are guaranteed to exist in the proxy object */}
-        <TextInput sugar={obj.current.fields.a!} />
-        <TextInput sugar={obj.current.fields.b!} />
+        <TextInput sugar={obj.current.fields.a} />
+        <TextInput sugar={obj.current.fields.b} />
       </>
     );
     await act(async () => {});
 
     const { result: childAIsPendingResult } = renderHook(() =>
-      obj.current.fields.a!.useIsPending()
+      obj.current.fields.a.useIsPending()
     );
     const { result: childBIsPendingResult } = renderHook(() =>
-      obj.current.fields.b!.useIsPending()
+      obj.current.fields.b.useIsPending()
     );
 
     expect(childAIsPendingResult.current).toBe(true);
