@@ -6,7 +6,7 @@ import { describeWithStrict } from '../util/describeWithStrict';
 describeWithStrict('useForm#collect', () => {
   test('collect method should be equivalent to sugar.get(true)', async () => {
     const { result } = renderHook(() =>
-      useForm<string>({ template: 'initial' })
+      useForm({ template: { status: 'resolved', value: 'initial' } })
     );
 
     render(<TextInput sugar={result.current.sugar} />);
@@ -23,7 +23,9 @@ describeWithStrict('useForm#collect', () => {
   });
 
   test('collect method should trigger validation like sugar.get(true)', async () => {
-    const { result } = renderHook(() => useForm({ template: { a: '' } }));
+    const { result } = renderHook(() =>
+      useForm({ template: { status: 'resolved', value: { a: '' } } })
+    );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
     const validate = async (
@@ -48,8 +50,8 @@ describeWithStrict('useForm#collect', () => {
 
   test('collect method should return the same type as sugar.get(true)', async () => {
     const { result } = renderHook(() =>
-      useForm<{ name: string; age: number }>({
-        template: { name: 'John', age: 25 },
+      useForm({
+        template: { status: 'resolved', value: { name: 'John', age: 25 } },
       })
     );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());

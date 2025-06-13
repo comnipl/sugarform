@@ -1,6 +1,11 @@
 export type SugarValue = unknown;
 export type SugarValueObject = SugarValue & Record<string, SugarValue>;
 
+export type SugarTemplateState<T extends SugarValue> =
+  | { status: 'pending' }
+  | { status: 'resolved'; value: T }
+  | undefined;
+
 export type SugarGetResult<T extends SugarValue> =
   | {
       result: 'success';
@@ -34,7 +39,12 @@ export type SugarTemplateSetter<T extends SugarValue> = (
 
 import type { SugarUseObject } from './useObject';
 import type { SugarUseValidation } from './useValidation';
+<<<<<<< HEAD
 import type { SugarUseTransform } from './useTransform';
+||||||| 2096774
+=======
+import type { SugarUseIsPending } from './useIsPending';
+>>>>>>> origin/main
 
 type SugarType<T extends SugarValue> = {
   get: SugarGetter<T>;
@@ -48,7 +58,12 @@ type SugarType<T extends SugarValue> = {
   destroy: () => void;
   useObject: SugarUseObject<T>;
   useValidation: SugarUseValidation<T>;
+<<<<<<< HEAD
   useTransform: SugarUseTransform<T>;
+||||||| 2096774
+=======
+  useIsPending: SugarUseIsPending;
+>>>>>>> origin/main
   addEventListener: <K extends keyof SugarEvent>(
     type: K,
     listener: CustomEventListener<SugarEvent[K]>

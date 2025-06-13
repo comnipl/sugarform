@@ -7,7 +7,7 @@ import { SugarInner } from '../../../packages/core/src/sugar/index';
 describeWithStrict('Sugar#setTemplate', () => {
   test('setTemplate(value, true) updates template and executes set (default behavior)', async () => {
     const { result } = renderHook(() =>
-      useForm<string>({ template: 'original' })
+      useForm({ template: { status: 'resolved', value: 'original' } })
     );
 
     render(<TextInput sugar={result.current.sugar} />);
@@ -21,14 +21,17 @@ describeWithStrict('Sugar#setTemplate', () => {
       value: 'new template',
     });
 
-    expect((result.current.sugar as SugarInner<string>).template).toBe(
-      'new template'
+    expect((result.current.sugar as SugarInner<string>).template).toStrictEqual(
+      {
+        status: 'resolved',
+        value: 'new template',
+      }
     );
   });
 
   test('setTemplate(value, false) updates template only without executing set', async () => {
     const { result } = renderHook(() =>
-      useForm<string>({ template: 'original' })
+      useForm({ template: { status: 'resolved', value: 'original' } })
     );
 
     render(<TextInput sugar={result.current.sugar} />);
@@ -43,14 +46,17 @@ describeWithStrict('Sugar#setTemplate', () => {
       value: 'current value',
     });
 
-    expect((result.current.sugar as SugarInner<string>).template).toBe(
-      'new template'
+    expect((result.current.sugar as SugarInner<string>).template).toStrictEqual(
+      {
+        status: 'resolved',
+        value: 'new template',
+      }
     );
   });
 
   test('setTemplate without executeSet parameter defaults to true', async () => {
     const { result } = renderHook(() =>
-      useForm<string>({ template: 'original' })
+      useForm({ template: { status: 'resolved', value: 'original' } })
     );
 
     render(<TextInput sugar={result.current.sugar} />);
@@ -64,14 +70,19 @@ describeWithStrict('Sugar#setTemplate', () => {
       value: 'new template',
     });
 
-    expect((result.current.sugar as SugarInner<string>).template).toBe(
-      'new template'
+    expect((result.current.sugar as SugarInner<string>).template).toStrictEqual(
+      {
+        status: 'resolved',
+        value: 'new template',
+      }
     );
   });
 
   test('setTemplate works with nested objects', async () => {
     const { result } = renderHook(() =>
-      useForm({ template: { a: 'initial', b: 'initial' } })
+      useForm({
+        template: { status: 'resolved', value: { a: 'initial', b: 'initial' } },
+      })
     );
     const { result: obj } = renderHook(() => result.current.sugar.useObject());
 
@@ -93,9 +104,19 @@ describeWithStrict('Sugar#setTemplate', () => {
 
     expect(
       (result.current.sugar as SugarInner<{ a: string; b: string }>).template
-    ).toStrictEqual({ a: 'new-a', b: 'new-b' });
+    ).toStrictEqual({ status: 'resolved', value: { a: 'new-a', b: 'new-b' } });
 
-    expect((obj.current.fields.a as SugarInner<string>).template).toBe('new-a');
-    expect((obj.current.fields.b as SugarInner<string>).template).toBe('new-b');
+    expect((obj.current.fields.a as SugarInner<string>).template).toStrictEqual(
+      {
+        status: 'resolved',
+        value: 'new-a',
+      }
+    );
+    expect((obj.current.fields.b as SugarInner<string>).template).toStrictEqual(
+      {
+        status: 'resolved',
+        value: 'new-b',
+      }
+    );
   });
 });

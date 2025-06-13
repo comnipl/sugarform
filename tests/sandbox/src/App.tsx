@@ -21,20 +21,7 @@ type FormType = {
 };
 
 function App() {
-  const { sugar, collect } = useForm<FormType>({
-    template: {
-      person_a: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
-      },
-      person_b: {
-        firstName: '',
-        lastName: '',
-        birthday: { year: NaN, month: NaN, day: NaN },
-      },
-    },
-  });
+  const { sugar, collect } = useForm<FormType>();
 
   const { fields } = sugar.useObject();
 
@@ -54,13 +41,17 @@ function App() {
       >
         collect
       </button>
-      <hr />
     </>
   );
 }
 
 function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
   const { fields } = sugar.useObject();
+  const isPending = sugar.useIsPending();
+
+  if (isPending) {
+    return <div>Loading person data...</div>;
+  }
 
   return (
     <div>
@@ -79,6 +70,7 @@ function PersonInput({ sugar }: { sugar: Sugar<Person> }) {
 
 function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
   const { fields } = sugar.useObject();
+  const isPending = sugar.useIsPending();
 
   const errors = sugar.useValidation<string>(
     useCallback(async (value, fail) => {
@@ -107,6 +99,10 @@ function BirthdayInput({ sugar }: { sugar: Sugar<Birthday> }) {
       }
     }, [])
   );
+
+  if (isPending) {
+    return <div>Loading birthday data...</div>;
+  }
 
   return (
     <div>

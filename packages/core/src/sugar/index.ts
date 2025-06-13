@@ -7,6 +7,7 @@ import {
   SugarSetResult,
   SugarSetter,
   SugarTemplateSetter,
+  SugarTemplateState,
   SugarValue,
   SugarValueObject,
 } from './types';
@@ -17,7 +18,12 @@ import {
   ValidationStage,
   FailFn,
 } from './useValidation';
+<<<<<<< HEAD
 import { useTransform, SugarUseTransform } from './useTransform';
+||||||| 2096774
+=======
+import { useIsPending, SugarUseIsPending } from './useIsPending';
+>>>>>>> origin/main
 
 export class SugarInner<T extends SugarValue> {
   // Sugarは、get/setができるようになるまでに、Reactのレンダリングを待つ必要があります。
@@ -64,12 +70,12 @@ export class SugarInner<T extends SugarValue> {
         status: 'unavailable';
       };
 
-  template: T;
+  template: SugarTemplateState<T>;
   private validators: Set<
     (stage: ValidationStage, value: T) => Promise<boolean>
   > = new Set();
 
-  constructor(template: T) {
+  constructor(template?: SugarTemplateState<T>) {
     const { promise: getPromise, resolve: resolveGetPromise } =
       Promise.withResolvers<SugarGetResult<T>>();
     const { promise: setPromise, resolve: resolveSetPromise } =
@@ -156,7 +162,7 @@ export class SugarInner<T extends SugarValue> {
   }
 
   setTemplate(value: T, executeSet = true): Promise<SugarSetResult<T>> {
-    this.template = value;
+    this.template = { status: 'resolved', value };
 
     switch (this.status.status) {
       case 'unavailable':
@@ -180,6 +186,20 @@ export class SugarInner<T extends SugarValue> {
           }
         }
     }
+  }
+
+  setPendingTemplate(): void {
+    this.template = { status: 'pending' };
+    if (this.status.status === 'ready' && this.status.templateSetter) {
+      this.status.templateSetter(undefined as T, false);
+    }
+  }
+
+  private getTemplateValue(): T | undefined {
+    if (this.template?.status === 'resolved') {
+      return this.template.value;
+    }
+    return undefined;
   }
 
   private eventTarget: EventTarget = new EventTarget();
@@ -215,9 +235,10 @@ export class SugarInner<T extends SugarValue> {
       const status = this.status;
       status.lock = true;
 
-      status.resolveSetPromise(
-        await setter(status.recentValue ?? this.template)
-      );
+      const initial = status.recentValue ?? this.getTemplateValue();
+      if (initial !== undefined) {
+        status.resolveSetPromise(await setter(initial));
+      }
       status.resolveGetPromise(await getter(false));
 
       if (status.recentTemplateValue !== null) {
@@ -273,9 +294,16 @@ export class SugarInner<T extends SugarValue> {
     deps?: React.DependencyList
   ) =>
     useValidation(this as Sugar<T>, validator, deps)) as SugarUseValidation<T>;
+<<<<<<< HEAD
 
   useTransform: SugarUseTransform<T> = (<U extends SugarValue>(config: {
     forward: (value: T) => Promise<U>;
     backward: (value: U) => Promise<T>;
   }) => useTransform(this as Sugar<T>, config)) as SugarUseTransform<T>;
+||||||| 2096774
+=======
+
+  useIsPending: SugarUseIsPending = (() =>
+    useIsPending(this as Sugar<T>)) as SugarUseIsPending;
+>>>>>>> origin/main
 }
