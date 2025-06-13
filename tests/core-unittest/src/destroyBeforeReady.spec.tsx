@@ -6,7 +6,9 @@ import { checkPending } from '../util/checkPending';
 
 describeWithStrict('Sugar#destroy before ready', () => {
   test('destroy resolves pending promises', async () => {
-    const { result } = renderHook(() => useForm<string>({ template: '' }));
+    const { result } = renderHook(() =>
+      useForm({ template: { status: 'resolved', value: '' } })
+    );
 
     const getPromise = result.current.sugar.get();
     const setPromise = result.current.sugar.set('test');
